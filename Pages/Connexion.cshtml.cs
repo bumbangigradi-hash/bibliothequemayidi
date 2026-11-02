@@ -39,7 +39,6 @@ public class ConnexionModel : PageModel
 
     public void OnGet()
     {
-        // Afficher le formulaire, sans redirection automatique.
     }
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
@@ -111,6 +110,17 @@ public class ConnexionModel : PageModel
             return LocalRedirect(returnUrl);
         }
 
-        return RedirectToPage("/Index");
+        var role = compte.CodeRole.Trim().ToUpperInvariant();
+
+        return role switch
+        {
+            "ADMINISTRATEUR" => RedirectToPage("/Admin/Index"),
+            "BIBLIOTHECAIRE" => RedirectToPage("/Bibliothecaire/Index"),
+            "GESTIONNAIRE" => RedirectToPage("/Gestionnaire/Index"),
+            "LECTEUR" => RedirectToPage("/Lecteur/Index"),
+            "RESPONSABLE" => RedirectToPage("/Responsable/Index"),
+            "VICE_RESPONSABLE" => RedirectToPage("/ViceResponsable/Index"),
+            _ => RedirectToPage("/Index")
+        };
     }
 }
