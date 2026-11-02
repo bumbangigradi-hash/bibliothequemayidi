@@ -1,16 +1,19 @@
-# Visual Studio
+
+# Fichiers temporaires de Visual Studio
 .vs/
 *.user
 *.suo
-*.cache
 
-# Compilation
+# Fichiers de compilation .NET
 bin/
 obj/
+publish/
 
-# Fichiers temporaires
-*.tmp
-*.log
-
-# Secrets et configurations locales
+# Paramètres locaux et secrets de développement
 appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Fichiers système
+.DS_Store
+Thumbs.db
