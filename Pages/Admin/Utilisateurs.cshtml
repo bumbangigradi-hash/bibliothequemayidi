@@ -1,0 +1,258 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Admin.UtilisateursModel
+
+@{
+    ViewData["Title"] = "Gestion des utilisateurs";
+}
+
+<style>
+    body {
+        background: #f4f7f5;
+        font-family: Arial, sans-serif;
+    }
+
+    .conteneur {
+        max-width: 1200px;
+        margin: 35px auto;
+        padding: 20px;
+    }
+
+    .entete {
+        background: #14532d;
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .carte {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+    th, td {
+        padding: 13px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+        background: #f1f5f9;
+    }
+
+    .bouton-ajouter {
+        display: inline-block;
+        background: #15803d;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 7px;
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+
+    .bouton-statut {
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+    }
+
+    .suspendre {
+        background: #dc2626;
+    }
+
+    .reactiver {
+        background: #15803d;
+    }
+
+    .actif {
+        color: #15803d;
+        font-weight: bold;
+    }
+
+    .suspendu {
+        color: #dc2626;
+        font-weight: bold;
+    }
+
+    .message {
+        background: #dcfce7;
+        color: #166534;
+        padding: 13px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .vide {
+        text-align: center;
+        padding: 25px;
+        color: #64748b;
+    }
+
+    .retour {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #166534;
+        text-decoration: none;
+    }
+
+    .photo {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+</style>
+
+<div class="conteneur">
+
+    <a asp-page="/Index" class="retour">
+        ← Retour au tableau de bord
+    </a>
+
+    <div class="entete">
+        <h1>Gestion des utilisateurs</h1>
+        <p>Gérez les bibliothécaires et les membres du personnel.</p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="message" role="status">
+            @Model.Message
+        </div>
+    }
+
+    <a asp-page="/Admin/CreerUtilisateur" class="bouton-ajouter">
+        + Créer un utilisateur
+    </a>
+
+    <div class="carte">
+
+        <h2>Personnel enregistré (@Model.Utilisateurs.Count)</h2>
+
+        @if (Model.Utilisateurs.Count == 0)
+        {
+            <div class="vide">
+                Aucun utilisateur du personnel enregistré.
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Photo</th>
+                        <th>Nom complet</th>
+                        <th>Fonction</th>
+                        <th>Identifiant</th>
+                        <th>Téléphone</th>
+                        <th>Date de création</th>
+                        <th>Statut</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var compte in Model.Utilisateurs)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(compte.CheminPhoto))
+                                {
+                                    <img src="@compte.CheminPhoto"
+                                         class="photo"
+                                         alt="Photo du personnel" />
+                                }
+                                else
+                                {
+                                    <span>👤</span>
+                                }
+                            </td>
+
+                            <td>
+                                @compte.NomUtilisateur
+                                @compte.Postnom
+                                @compte.Prenom
+                            </td>
+
+                            <td>
+                                @compte.CodeRoleNavigation?.NomRole
+                            </td>
+
+                            <td>@compte.Identifiant</td>
+
+                            <td>@compte.Telephone</td>
+
+                            <td>
+                                @compte.DateCreation.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @if (compte.StatutCompte == "ACTIF" && compte.Actif)
+                                {
+                                    <span class="actif">ACTIF</span>
+                                }
+                                else
+                                {
+                                    <span class="suspendu">
+                                        @compte.StatutCompte
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (compte.StatutCompte == "ACTIF" && compte.Actif)
+                                {
+                                    <form method="post"
+                                          asp-page-handler="ChangerStatut"
+                                          onsubmit="return confirm('Voulez-vous vraiment suspendre cet utilisateur ?');">
+
+                                        <input type="hidden"
+                                               name="codeCompte"
+                                               value="@compte.CodeCompte" />
+
+                                        <button type="submit"
+                                                class="bouton-statut suspendre">
+                                            Suspendre
+                                        </button>
+                                    </form>
+                                }
+                                else if (compte.StatutCompte == "SUSPENDU")
+                                {
+                                    <form method="post"
+                                          asp-page-handler="ChangerStatut"
+                                          onsubmit="return confirm('Voulez-vous réactiver cet utilisateur ?');">
+
+                                        <input type="hidden"
+                                               name="codeCompte"
+                                               value="@compte.CodeCompte" />
+
+                                        <button type="submit"
+                                                class="bouton-statut reactiver">
+                                            Réactiver
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span>Action indisponible</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </div>
+</div>

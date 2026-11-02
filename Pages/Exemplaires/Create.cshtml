@@ -1,0 +1,244 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Exemplaires.CreateModel
+
+@{
+    ViewData["Title"] = "Ajouter un exemplaire";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3">Ajouter un exemplaire</h1>
+            <p class="text-muted mb-0">
+                Enregistrer une copie physique d'un document dans la bibliothèque.
+            </p>
+        </div>
+
+        <a asp-page="/Documents/Index" class="btn btn-outline-secondary">
+            Retour au catalogue
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger"
+                 role="alert"></div>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <h2 class="h5 mb-3">Identification du document</h2>
+
+                <div class="mb-3">
+                    <label asp-for="Input.CodeDocument" class="form-label">
+                        Document
+                    </label>
+
+                    <select asp-for="Input.CodeDocument" class="form-select">
+                        <option value="">-- Sélectionner un document --</option>
+
+                        @foreach (var document in Model.Documents)
+                        {
+                            <option value="@document.CodeDocument">
+                                @document.Titre
+                            </option>
+                        }
+                    </select>
+
+                    <span asp-validation-for="Input.CodeDocument"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.NumeroInventaire"
+                               class="form-label">
+                            Numéro d'inventaire
+                        </label>
+
+                        <input asp-for="Input.NumeroInventaire"
+                               class="form-control"
+                               placeholder="Ex. INV-0001" />
+
+                        <span asp-validation-for="Input.NumeroInventaire"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.CodeBarres"
+                               class="form-label">
+                            Code-barres (facultatif)
+                        </label>
+
+                        <input asp-for="Input.CodeBarres"
+                               class="form-control"
+                               placeholder="Code-barres du livre" />
+
+                        <span asp-validation-for="Input.CodeBarres"
+                              class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h2 class="h5 mb-3">Classement physique</h2>
+
+                <div class="mb-3">
+                    <label asp-for="Input.CodeEmplacement"
+                           class="form-label">
+                        Emplacement
+                    </label>
+
+                    <select asp-for="Input.CodeEmplacement"
+                            class="form-select">
+                        <option value="">-- Sélectionner un emplacement --</option>
+
+                        @foreach (var emplacement in Model.Emplacements)
+                        {
+                            <option value="@emplacement.CodeEmplacement">
+                                @emplacement.CodeEtagereNavigation
+                                .CodeRayonNavigation.NomRayon
+                                —
+                                @emplacement.CodeEtagereNavigation.NumeroEtagereRoman
+                                /
+                                @emplacement.NumeroPlace
+                            </option>
+                        }
+                    </select>
+
+                    <span asp-validation-for="Input.CodeEmplacement"
+                          class="text-danger"></span>
+
+                    <div class="form-text">
+                        La cote est générée à partir du rayon, de l'étagère
+                        et de la place sélectionnée.
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <h2 class="h5 mb-3">État et acquisition</h2>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.EtatDocument"
+                               class="form-label">
+                            État matériel
+                        </label>
+
+                        <select asp-for="Input.EtatDocument"
+                                class="form-select">
+                            <option value="NEUF">Neuf</option>
+                            <option value="BON">Bon état</option>
+                            <option value="USE">Usé</option>
+                            <option value="ENDOMMAGE">Endommagé</option>
+                        </select>
+
+                        <span asp-validation-for="Input.EtatDocument"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.DateAcquisition"
+                               class="form-label">
+                            Date d'acquisition
+                        </label>
+
+                        <input asp-for="Input.DateAcquisition"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="Input.DateAcquisition"
+                              class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.ModeAcquisition"
+                               class="form-label">
+                            Mode d'acquisition
+                        </label>
+
+                        <select asp-for="Input.ModeAcquisition"
+                                class="form-select">
+                            <option value="">-- Choisir --</option>
+                            <option value="ACHAT">Achat</option>
+                            <option value="DON">Don</option>
+                            <option value="LEGS">Legs</option>
+                            <option value="AUTRE">Autre</option>
+                        </select>
+
+                        <span asp-validation-for="Input.ModeAcquisition"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Input.ValeurAcquisition"
+                               class="form-label">
+                            Valeur d'acquisition
+                        </label>
+
+                        <input asp-for="Input.ValeurAcquisition"
+                               type="number"
+                               min="0"
+                               step="0.01"
+                               class="form-control"
+                               placeholder="0,00" />
+
+                        <span asp-validation-for="Input.ValeurAcquisition"
+                              class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.DeviseValeur"
+                           class="form-label">
+                        Devise
+                    </label>
+
+                    <select asp-for="Input.DeviseValeur"
+                            class="form-select">
+                        <option value="CDF">Franc congolais (CDF)</option>
+                        <option value="USD">Dollar américain (USD)</option>
+                    </select>
+
+                    <span asp-validation-for="Input.DeviseValeur"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Input.Observations"
+                           class="form-label">
+                        Observations
+                    </label>
+
+                    <textarea asp-for="Input.Observations"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Remarques sur cet exemplaire..."></textarea>
+
+                    <span asp-validation-for="Input.Observations"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Enregistrer l'exemplaire
+                    </button>
+
+                    <a asp-page="/Documents/Index"
+                       class="btn btn-outline-secondary">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

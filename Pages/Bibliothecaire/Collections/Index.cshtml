@@ -1,0 +1,133 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Bibliothecaire.Collections.IndexModel
+
+@{
+    ViewData["Title"] = "Gestion des collections";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold text-primary">
+                <i class="bi bi-collection"></i>
+                Gestion des collections
+            </h2>
+            <p class="text-muted mb-0">
+                Gestion des collections documentaires de la bibliothèque.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-page="/Bibliothecaire/Index"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Retour
+            </a>
+
+            <a asp-page="./Creer"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                Ajouter une collection
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i>
+            @Model.Message
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">
+                Liste des collections
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Collections == null || !Model.Collections.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-collection text-muted"
+                       style="font-size: 3rem;">
+                    </i>
+
+                    <h5 class="mt-3">
+                        Aucune collection enregistrée
+                    </h5>
+
+                    <p class="text-muted">
+                        Commencez par ajouter une collection documentaire.
+                    </p>
+
+                    <a asp-page="./Creer"
+                       class="btn btn-primary">
+                        Ajouter une collection
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">N°</th>
+                                <th>Nom de la collection</th>
+                                <th>Description</th>
+                                <th class="text-center">Documents associés</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var collection in Model.Collections)
+                            {
+                                <tr>
+                                    <td>
+                                        @collection.CodeCollection
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        @collection.NomCollection
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(collection.Description))
+                                        {
+                                            @collection.Description
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Aucune description
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge bg-primary rounded-pill">
+                                            @collection.Documents.Count
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>

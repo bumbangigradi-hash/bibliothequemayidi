@@ -1,0 +1,182 @@
+﻿@page "/Connexion"
+@model bibliotheque_mayidi.Pages.ConnexionModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Connexion - Bibliothèque de Mayidi";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"]</title>
+
+    <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                font-family: Arial, Helvetica, sans-serif;
+                background: #f1f5f9;
+                color: #1e293b;
+            }
+
+            .login {
+                width: 100%;
+                max-width: 430px;
+                padding: 35px;
+                background: #ffffff;
+                border-radius: 16px;
+                box-shadow: 0 10px 35px rgba(0, 0, 0, 0.10);
+            }
+
+            .logo {
+                text-align: center;
+                font-size: 42px;
+                margin-bottom: 12px;
+            }
+
+            h1 {
+                margin: 0 0 10px;
+                text-align: center;
+                font-size: 25px;
+                color: #14532d;
+            }
+
+            .subtitle {
+                text-align: center;
+                color: #64748b;
+                margin-bottom: 28px;
+                line-height: 1.5;
+            }
+
+            label {
+                display: block;
+                margin: 17px 0 7px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+
+            input {
+                display: block;
+                width: 100%;
+                padding: 13px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                font-size: 16px;
+                background: #ffffff;
+            }
+
+                input:focus {
+                    outline: 2px solid #86efac;
+                    border-color: #15803d;
+                }
+
+            button {
+                width: 100%;
+                margin-top: 24px;
+                padding: 14px;
+                border: none;
+                border-radius: 8px;
+                background: #166534;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+                button:hover {
+                    background: #14532d;
+                }
+
+            .error {
+                margin-top: 18px;
+                padding: 12px;
+                background: #fee2e2;
+                color: #991b1b;
+                border-radius: 8px;
+                font-size: 14px;
+            }
+
+            .validation {
+                display: block;
+                margin-top: 5px;
+                color: #b91c1c;
+                font-size: 13px;
+            }
+
+            .footer {
+                margin-top: 24px;
+                text-align: center;
+                font-size: 14px;
+                color: #64748b;
+                line-height: 1.8;
+            }
+
+            a {
+                color: #166534;
+                font-weight: bold;
+                text-decoration: none;
+            }
+
+                a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+
+<body>
+    <main class="login">
+        <div class="logo">📚</div>
+
+        <h1>Bibliothèque de Mayidi</h1>
+
+        <p class="subtitle">
+            Grand Séminaire de Mayidi<br />
+            Connectez-vous à votre compte
+        </p>
+
+        <form method="post">
+            @Html.AntiForgeryToken()
+
+            <label asp-for="Identifiant">Identifiant</label>
+            <input asp-for="Identifiant"
+                   autocomplete="username"
+                   placeholder="Entrez votre identifiant" />
+            <span asp-validation-for="Identifiant"
+                  class="validation"></span>
+
+            <label asp-for="MotDePasse">Mot de passe</label>
+            <input asp-for="MotDePasse"
+                   type="password"
+                   autocomplete="current-password"
+                   placeholder="Entrez votre mot de passe" />
+            <span asp-validation-for="MotDePasse"
+                  class="validation"></span>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Erreur))
+            {
+                <div class="error" role="alert">
+                    @Model.Erreur
+                </div>
+            }
+
+            <button type="submit">Se connecter</button>
+        </form>
+
+        <div class="footer">
+            Vous êtes lecteur et n'avez pas encore de compte ?<br />
+            <a href="/InscriptionLecteur">Créer un compte lecteur</a>
+        </div>
+    </main>
+</body>
+</html>

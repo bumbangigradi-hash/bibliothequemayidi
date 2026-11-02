@@ -1,0 +1,272 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Prets.IndexModel
+
+@{
+    ViewData["Title"] = "Gestion des prêts";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center
+        flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Gestion des prêts</h1>
+            <p class="text-muted mb-0">
+                Suivi des bordereaux, des échéances et des retards.
+            </p>
+        </div>
+
+        <a asp-page="/Index" class="btn btn-outline-secondary">
+            Retour au tableau de bord
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Bordereaux enregistrés</div>
+                    <div class="fs-2 fw-bold">
+                        @Model.TotalBordereaux
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Exemplaires en cours de prêt</div>
+                    <div class="fs-2 fw-bold text-primary">
+                        @Model.TotalLignesEnCours
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted">Échéances dépassées</div>
+                    <div class="fs-2 fw-bold text-danger">
+                        @Model.TotalRetards
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-7">
+                    <label for="recherche" class="form-label">
+                        Rechercher
+                    </label>
+                    <input id="recherche"
+                           name="recherche"
+                           value="@Model.Recherche"
+                           class="form-control"
+                           placeholder="N° bordereau, lecteur ou titre..." />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="statut" class="form-label">
+                        Statut du bordereau
+                    </label>
+                    <select id="statut"
+                            name="statut"
+                            class="form-select">
+                        <option value="">Tous les statuts</option>
+
+                        @foreach (var statut in new[]
+                        {
+                            "OUVERT",
+                            "PARTIELLEMENT_RETOURNE",
+                            "CLOTURE"
+                        })
+                        {
+                            if (Model.StatutSelectionne == statut)
+                            {
+                                <option value="@statut" selected>
+                                    @statut.Replace("_", " ")
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@statut">
+                                    @statut.Replace("_", " ")
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        Filtrer
+                    </button>
+                    <a asp-page="./Index"
+                       class="btn btn-outline-secondary">
+                        Effacer
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <strong>Historique des bordereaux</strong>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Bordereau</th>
+                        <th>Lecteur</th>
+                        <th>Date du prêt</th>
+                        <th>Exemplaires</th>
+                        <th>Statut</th>
+                        <th>Échéances</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Bordereaux.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6"
+                                class="text-center text-muted py-5">
+                                Aucun bordereau trouvé.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var bordereau in Model.Bordereaux)
+                        {
+                            var lecteur = bordereau.CodeLecteurNavigation;
+                            var compte = lecteur.CodeCompteNavigation;
+                            var lignes = bordereau.LignesPrets.ToList();
+                            var enCours = lignes.Count(l =>
+                                l.StatutLigne == "EN_COURS");
+
+                            var retards = lignes.Count(l =>
+                                l.StatutLigne == "EN_COURS" &&
+                                l.DateEcheance <
+                                    DateOnly.FromDateTime(DateTime.Today));
+
+                            <tr>
+                                <td>
+                                    <strong>
+                                        @bordereau.NumeroBordereau
+                                    </strong>
+                                    <div class="small text-muted">
+                                        @lignes.Count exemplaire(s)
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @compte.NomUtilisateur
+                                    @compte.Postnom
+                                    @compte.Prenom
+                                    <div class="small text-muted">
+                                        N° @lecteur.NumeroLecteur
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @bordereau.DatePret.ToString(
+                                        "dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>
+                                    @foreach (var ligne in lignes)
+                                    {
+                                        <div class="mb-2">
+                                            <div>
+                                                @ligne.CodeExemplaireNavigation
+                                                .CodeDocumentNavigation.Titre
+                                            </div>
+
+                                            <small class="text-muted">
+                                                Échéance :
+                                                @ligne.DateEcheance.ToString(
+                                                    "dd/MM/yyyy")
+                                            </small>
+
+                                            @if (ligne.StatutLigne == "RETOURNE")
+                                            {
+                                                <span class="badge bg-success">
+                                                    Retourné
+                                                </span>
+                                            }
+                                            else if (ligne.StatutLigne == "MANQUANT")
+                                            {
+                                                <span class="badge bg-dark">
+                                                    Manquant
+                                                </span>
+                                            }
+                                            else if (ligne.DateEcheance <
+                                                DateOnly.FromDateTime(DateTime.Today))
+                                            {
+                                                <span class="badge bg-danger">
+                                                    En retard
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary">
+                                                    En cours
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (bordereau.StatutBordereau == "CLOTURE")
+                                    {
+                                        <span class="badge bg-success">
+                                            Clôturé
+                                        </span>
+                                    }
+                                    else if (bordereau.StatutBordereau ==
+                                        "PARTIELLEMENT_RETOURNE")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Retour partiel
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">
+                                            @bordereau.StatutBordereau
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (retards > 0)
+                                    {
+                                        <span class="text-danger fw-semibold">
+                                            @retards retard(s)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            @enCours en cours
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

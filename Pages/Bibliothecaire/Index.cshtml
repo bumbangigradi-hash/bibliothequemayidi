@@ -1,0 +1,295 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Bibliothecaire.IndexModel
+
+@{
+    ViewData["Title"] = "Espace bibliothécaire";
+}
+
+<style>
+    .entete-bibliothecaire {
+        background: linear-gradient(120deg, #14532d, #166534);
+        color: white;
+        padding: 28px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .carte-fonction {
+        border: none;
+        border-radius: 12px;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+        .carte-fonction:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 7px 18px rgba(0,0,0,.10) !important;
+        }
+
+    .icone-fonction {
+        font-size: 32px;
+        margin-bottom: 14px;
+    }
+
+    .btn-bibliotheque {
+        background: #14532d;
+        color: white;
+        border: none;
+    }
+
+        .btn-bibliotheque:hover {
+            background: #166534;
+            color: white;
+        }
+
+    .statistique {
+        border-left: 4px solid #166534;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="container py-4">
+
+    <!-- EN-TÊTE -->
+    <div class="entete-bibliothecaire">
+
+        <h1>
+            <i class="bi bi-book-half"></i>
+            Espace bibliothécaire
+        </h1>
+
+        <p class="mb-0">
+            Bibliothèque du Grand Séminaire Saint Robert Bellarmin de Mayidi
+        </p>
+
+        <p class="mt-2 mb-0">
+            Gestion des documents, collections, réservations et emprunts.
+        </p>
+
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card statistique shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total des réservations</h6>
+                    <h2 class="fw-bold text-primary">
+                        @Model.TotalReservations
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card statistique shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Total des lecteurs</h6>
+                    <h2 class="fw-bold text-success">
+                        @Model.TotalLecteurs
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card statistique shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Emprunts en cours</h6>
+                    <h2 class="fw-bold text-warning">
+                        @Model.TotalEmpruntsEnCours
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ÉTAT DES RÉSERVATIONS -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-calendar-check"></i>
+                État des réservations
+            </h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center g-3">
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <h6 class="text-muted">En attente</h6>
+                        <h3 class="text-warning fw-bold">
+                            @Model.ReservationsEnAttente
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <h6 class="text-muted">En vérification</h6>
+                        <h3 class="text-info fw-bold">
+                            @Model.ReservationsEnVerification
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded">
+                        <h6 class="text-muted">Prêtes</h6>
+                        <h3 class="text-success fw-bold">
+                            @Model.ReservationsPretes
+                        </h3>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODULES -->
+    <div class="row g-3">
+
+        <!-- RÉSERVATIONS -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">📌</div>
+
+                    <h5 class="card-title">Réservations</h5>
+
+                    <p class="card-text">
+                        Consultez les demandes et traitez chaque ouvrage
+                        individuellement.
+                    </p>
+
+                    <a asp-page="/Reservations/Index"
+                       class="btn btn-primary">
+                        Gérer les réservations
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- EMPRUNTS -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">📖</div>
+
+                    <h5 class="card-title">Emprunts et retours</h5>
+
+                    <p class="card-text">
+                        Accédez à la gestion des prêts et des retours.
+                    </p>
+
+                    <a asp-page="/Emprunts/Index"
+                       class="btn btn-primary">
+                        Gérer les emprunts
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- LECTEURS -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">👥</div>
+
+                    <h5 class="card-title">Lecteurs</h5>
+
+                    <p class="card-text">
+                        Consultez les dossiers des lecteurs inscrits.
+                    </p>
+
+                    <a asp-page="/Lecteurs/Index"
+                       class="btn btn-primary">
+                        Gérer les lecteurs
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- CATALOGUE -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">📚</div>
+
+                    <h5 class="card-title">Catalogue</h5>
+
+                    <p class="card-text">
+                        Recherchez les documents, leurs descriptions
+                        et leurs exemplaires.
+                    </p>
+
+                    <a asp-page="/Catalogue/Index"
+                       class="btn btn-outline-primary">
+                        Ouvrir le catalogue
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- AJOUTER UN DOCUMENT -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">➕📚</div>
+
+                    <h5 class="card-title">Ajouter un document</h5>
+
+                    <p class="card-text">
+                        Enregistrez de nouveaux livres, manuels,
+                        revues, dictionnaires et autres documents.
+                    </p>
+
+                    <a asp-page="/Documents/Create"
+                       class="btn btn-bibliotheque">
+                        Ajouter un document
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- COLLECTIONS -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card carte-fonction h-100 shadow-sm">
+                <div class="card-body">
+
+                    <div class="icone-fonction">🗂️</div>
+
+                    <h5 class="card-title">Collections</h5>
+
+                    <p class="card-text">
+                        Créez et organisez les collections documentaires
+                        de la bibliothèque.
+                    </p>
+
+                    <a asp-page="/Bibliothecaire/Collections/Index"
+                       class="btn btn-bibliotheque">
+                        Gérer les collections
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

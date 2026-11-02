@@ -1,0 +1,78 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<div class="container py-5">
+
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold">Bibliothèque du Grand Séminaire</h1>
+        <h2 class="h4 text-secondary">Saint Robert Bellarmin de Mayidi</h2>
+        <p class="text-muted mt-3">
+            Bienvenue dans le système de gestion de la bibliothèque.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="fs-1 mb-3">📚</div>
+                    <h3 class="h5">Gestion des emprunts</h3>
+                    <p class="text-muted">
+                        Enregistrer les prêts de livres et consulter les emprunts.
+                    </p>
+                    <a asp-page="/Emprunts/Index"
+                       class="btn btn-outline-primary">
+                        Accéder aux emprunts
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body p-4">
+                    <div class="fs-1 mb-3">↩️</div>
+                    <h3 class="h5">Retours des livres</h3>
+                    <p class="text-muted">
+                        Enregistrer les retours, contrôler l'état des ouvrages
+                        et remettre les exemplaires en disponibilité lorsque cela est autorisé.
+                    </p>
+                    <a asp-page="/Retours/Index"
+                       class="btn btn-primary">
+                        Gérer les retours
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="fs-1 mb-3">🔎</div>
+                    <h3 class="h5">Catalogue</h3>
+                    <p class="text-muted">
+                        Rechercher les documents et les exemplaires de la bibliothèque.
+                    </p>
+                    <a asp-page="/Catalogue/Index"
+                       class="btn btn-outline-primary">
+                        Consulter le catalogue
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="alert alert-light border mt-5">
+        <strong>Bibliothèque de Mayidi</strong>
+        <p class="mb-0 mt-1">
+            Utilise les modules correspondant à tes autorisations pour gérer
+            les activités de la bibliothèque.
+        </p>
+    </div>
+
+</div>

@@ -1,0 +1,233 @@
+﻿@page "{id:int}"
+@model bibliotheque_mayidi.Pages.Exemplaires.DetailsModel
+
+@{
+    ViewData["Title"] = "Détails de l'exemplaire";
+
+    var exemplaire = Model.Exemplaire;
+    var document = exemplaire.CodeDocumentNavigation;
+    var emplacement = exemplaire.CodeEmplacementNavigation;
+    var etagere = emplacement.CodeEtagereNavigation;
+    var rayon = etagere.CodeRayonNavigation;
+}
+
+<div class="container py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Fiche de l'exemplaire</h1>
+            <p class="text-muted mb-0">
+                Inventaire n° @exemplaire.NumeroInventaire
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-page="./Index"
+               class="btn btn-outline-secondary">
+                Retour à la liste
+            </a>
+
+            <a asp-page="./Edit"
+               asp-route-id="@exemplaire.CodeExemplaire"
+               class="btn btn-primary">
+                Modifier
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Informations bibliographiques</h2>
+                </div>
+
+                <div class="card-body">
+                    <h3 class="h4">@document.Titre</h3>
+
+                    @if (!string.IsNullOrWhiteSpace(document.SousTitre))
+                    {
+                        <p class="text-muted">@document.SousTitre</p>
+                    }
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Auteur(s)</dt>
+                        <dd class="col-sm-8">
+                            @if (document.DocumentsAuteurs.Any())
+                            {
+                                @string.Join(", ",
+                                    document.DocumentsAuteurs
+                                        .OrderBy(a => a.OrdreAffichage)
+                                        .Select(a =>
+                                            $"{a.CodeAuteurNavigation.PrenomAuteur} {a.CodeAuteurNavigation.NomAuteur}".Trim()))
+                            }
+                            else
+                            {
+                                <span class="text-muted">Non renseigné</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4">Type de document</dt>
+                        <dd class="col-sm-8">
+                            @document.CodeTypeDocumentNavigation.NomTypeDocument
+                        </dd>
+
+                        <dt class="col-sm-4">ISBN / ISSN</dt>
+                        <dd class="col-sm-8">
+                            @(document.IsbnIssn ?? "Non renseigné")
+                        </dd>
+
+                        <dt class="col-sm-4">Édition</dt>
+                        <dd class="col-sm-8">
+                            @(document.Edition ?? "Non renseignée")
+                        </dd>
+
+                        <dt class="col-sm-4">Lieu de publication</dt>
+                        <dd class="col-sm-8">
+                            @(document.LieuPublication ?? "Non renseigné")
+                        </dd>
+
+                        <dt class="col-sm-4">Année de publication</dt>
+                        <dd class="col-sm-8">
+                            @(document.AnneePublication?.ToString() ?? "Non renseignée")
+                        </dd>
+
+                        <dt class="col-sm-4">Langue</dt>
+                        <dd class="col-sm-8">
+                            @(document.Langue ?? "Non renseignée")
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Inventaire physique</h2>
+                </div>
+
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Numéro d'inventaire</dt>
+                        <dd class="col-sm-8">@exemplaire.NumeroInventaire</dd>
+
+                        <dt class="col-sm-4">Cote</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-dark fs-6">
+                                @exemplaire.Cote
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-4">Code-barres</dt>
+                        <dd class="col-sm-8">
+                            @(exemplaire.CodeBarres ?? "Non renseigné")
+                        </dd>
+
+                        <dt class="col-sm-4">Rayon</dt>
+                        <dd class="col-sm-8">@rayon.NomRayon</dd>
+
+                        <dt class="col-sm-4">Étagère</dt>
+                        <dd class="col-sm-8">
+                            @etagere.NumeroEtagereRoman
+                        </dd>
+
+                        <dt class="col-sm-4">Place</dt>
+                        <dd class="col-sm-8">@emplacement.NumeroPlace</dd>
+
+                        <dt class="col-sm-4">État matériel</dt>
+                        <dd class="col-sm-8">@exemplaire.EtatDocument</dd>
+
+                        <dt class="col-sm-4">Statut</dt>
+                        <dd class="col-sm-8">
+                            @switch (exemplaire.StatutExemplaire)
+                            {
+                                case "DISPONIBLE":
+                                    <span class="badge bg-success">Disponible</span>
+                                    break;
+                                case "EMPRUNTE":
+                                    <span class="badge bg-primary">Emprunté</span>
+                                    break;
+                                case "RESERVE":
+                                    <span class="badge bg-warning text-dark">Réservé</span>
+                                    break;
+                                case "ENDOMMAGE":
+                                    <span class="badge bg-danger">Endommagé</span>
+                                    break;
+                                case "PERDU":
+                                    <span class="badge bg-dark">Perdu</span>
+                                    break;
+                                case "RETIRE":
+                                    <span class="badge bg-secondary">Retiré</span>
+                                    break;
+                                default:
+                                    @exemplaire.StatutExemplaire
+                                    break;
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Acquisition</h2>
+                </div>
+
+                <div class="card-body">
+                    <dl class="mb-0">
+                        <dt>Date d'acquisition</dt>
+                        <dd>
+                            @(exemplaire.DateAcquisition?.ToString("dd/MM/yyyy")
+                                ?? "Non renseignée")
+                        </dd>
+
+                        <dt>Mode d'acquisition</dt>
+                        <dd>
+                            @(exemplaire.ModeAcquisition ?? "Non renseigné")
+                        </dd>
+
+                        <dt>Valeur d'acquisition</dt>
+                        <dd>
+                            @if (exemplaire.ValeurAcquisition.HasValue)
+                            {
+                                @exemplaire.ValeurAcquisition.Value.ToString("N2")
+                                @(" " + exemplaire.DeviseValeur)
+                            }
+                            else
+                            {
+                                <span>Non renseignée</span>
+                            }
+                        </dd>
+
+                        <dt>Date d'enregistrement</dt>
+                        <dd>
+                            @exemplaire.DateCreation.ToString("dd/MM/yyyy HH:mm")
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Observations</h2>
+                </div>
+
+                <div class="card-body">
+                    @if (!string.IsNullOrWhiteSpace(exemplaire.Observations))
+                    {
+                        <p class="mb-0">@exemplaire.Observations</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            Aucune observation enregistrée.
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

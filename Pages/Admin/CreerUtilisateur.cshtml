@@ -1,0 +1,244 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Admin.CreerUtilisateurModel
+
+@{
+    ViewData["Title"] = "Créer un utilisateur";
+}
+
+<style>
+    body {
+        background: #f4f7f5;
+        font-family: Arial, sans-serif;
+    }
+
+    .conteneur {
+        max-width: 1000px;
+        margin: 35px auto;
+        padding: 20px;
+    }
+
+    .entete {
+        background: #14532d;
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .carte {
+        background: white;
+        padding: 28px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+    }
+
+    .grille {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .champ {
+        margin-bottom: 18px;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #334155;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        box-sizing: border-box;
+    }
+
+    .bouton {
+        background: #15803d;
+        color: white;
+        padding: 13px 22px;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .bouton:hover {
+            background: #166534;
+        }
+
+    .retour {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #166534;
+        text-decoration: none;
+    }
+
+    .erreurs {
+        color: #b91c1c;
+        margin-bottom: 15px;
+    }
+
+    .information {
+        background: #ecfdf5;
+        padding: 14px;
+        border-radius: 8px;
+        color: #166534;
+        margin-bottom: 20px;
+    }
+
+    .validation {
+        color: #b91c1c;
+        font-size: 13px;
+    }
+
+    @@media (max-width: 650px) {
+        .grille {
+            grid-template-columns: 1fr;
+        }
+
+        .conteneur {
+            padding: 12px;
+        }
+
+        .carte {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="conteneur">
+
+    <a asp-page="/Admin/Utilisateurs" class="retour">
+        ← Retour aux utilisateurs
+    </a>
+
+    <div class="entete">
+        <h1>Créer un compte utilisateur</h1>
+        <p>
+            Enregistrement des bibliothécaires et du personnel de la bibliothèque.
+        </p>
+    </div>
+
+    <div class="carte">
+
+        <div class="information">
+            Le compte sera automatiquement activé après sa création.
+            L'identifiant institutionnel sera généré automatiquement.
+        </div>
+
+        <div asp-validation-summary="All" class="erreurs"></div>
+
+        <form method="post" enctype="multipart/form-data">
+
+            <h3>Identité du personnel</h3>
+
+            <div class="grille">
+
+                <div class="champ">
+                    <label asp-for="Input.NomUtilisateur">Nom *</label>
+                    <input asp-for="Input.NomUtilisateur" />
+                    <span asp-validation-for="Input.NomUtilisateur"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.Postnom">Postnom</label>
+                    <input asp-for="Input.Postnom" />
+                    <span asp-validation-for="Input.Postnom"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.Prenom">Prénom</label>
+                    <input asp-for="Input.Prenom" />
+                    <span asp-validation-for="Input.Prenom"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.CodeRole">Fonction *</label>
+                    <select asp-for="Input.CodeRole"
+                            asp-items="Model.RolesDisponibles">
+                        <option value="">-- Choisir une fonction --</option>
+                    </select>
+                    <span asp-validation-for="Input.CodeRole"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.Telephone">Téléphone *</label>
+                    <input asp-for="Input.Telephone" />
+                    <span asp-validation-for="Input.Telephone"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.EmailExterne">E-mail personnel</label>
+                    <input asp-for="Input.EmailExterne" type="email" />
+                    <span asp-validation-for="Input.EmailExterne"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.Photo">Photo de profil</label>
+                    <input asp-for="Input.Photo"
+                           type="file"
+                           accept=".jpg,.jpeg,.png,.webp" />
+                    <span asp-validation-for="Input.Photo"
+                          class="validation"></span>
+                </div>
+
+            </div>
+
+            <hr />
+
+            <h3>Informations de connexion</h3>
+
+            <div class="grille">
+
+                <div class="champ">
+                    <label asp-for="Input.MotDePasse">
+                        Mot de passe *
+                    </label>
+
+                    <input asp-for="Input.MotDePasse"
+                           type="password"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="Input.MotDePasse"
+                          class="validation"></span>
+                </div>
+
+                <div class="champ">
+                    <label asp-for="Input.ConfirmationMotDePasse">
+                        Confirmer le mot de passe *
+                    </label>
+
+                    <input asp-for="Input.ConfirmationMotDePasse"
+                           type="password"
+                           autocomplete="new-password" />
+
+                    <span asp-validation-for="Input.ConfirmationMotDePasse"
+                          class="validation"></span>
+                </div>
+
+            </div>
+
+            <button type="submit" class="bouton">
+                <i class="bi bi-person-plus"></i>
+                Créer le compte
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

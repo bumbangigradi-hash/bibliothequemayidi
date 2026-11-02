@@ -1,0 +1,269 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Retours.IndexModel
+
+@{
+    ViewData["Title"] = "Retours des livres";
+    var aujourdHui = DateOnly.FromDateTime(DateTime.Today);
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Retours des livres</h1>
+            <p class="text-muted mb-0">
+                Enregistrement des retours et contrôle de l'état des exemplaires.
+            </p>
+        </div>
+
+        <a asp-page="/Emprunts/Index" class="btn btn-outline-secondary">
+            Retour aux emprunts
+        </a>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.MessageSucces))
+    {
+        <div class="alert alert-success">
+            @Model.MessageSucces
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h2 class="h5 mb-0">Rechercher un livre à retourner</h2>
+        </div>
+
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-9">
+                    <input asp-for="Recherche"
+                           class="form-control"
+                           placeholder="Numéro lecteur, titre, cote ou numéro d'inventaire" />
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Rechercher
+                    </button>
+
+                    <a asp-page="/Retours/Index"
+                       class="btn btn-outline-secondary">
+                        Effacer
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header py-3">
+            <h2 class="h5 mb-0">
+                Emprunts en cours
+                <span class="badge bg-secondary">@Model.EmpruntsEnCours.Count</span>
+            </h2>
+        </div>
+
+        <div class="card-body">
+            @if (Model.EmpruntsEnCours.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    Aucun emprunt en cours ne correspond à la recherche.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Livre</th>
+                                <th>Lecteur</th>
+                                <th>Bordereau de prêt</th>
+                                <th>Échéance</th>
+                                <th>Retour</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var emprunt in Model.EmpruntsEnCours)
+                            {
+                                var retard = emprunt.DateEcheance < aujourdHui;
+
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            @emprunt.CodeExemplaireNavigation
+                                            .CodeDocumentNavigation.Titre
+                                        </strong>
+                                        <div class="small text-muted">
+                                            Cote : @emprunt.CodeExemplaireNavigation.Cote
+                                        </div>
+                                        <div class="small text-muted">
+                                            Inventaire :
+                                            @emprunt.CodeExemplaireNavigation.NumeroInventaire
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        @emprunt.CodeBordereauPretNavigation
+                                        .CodeLecteurNavigation.NumeroLecteur
+                                    </td>
+
+                                    <td>
+                                        @emprunt.CodeBordereauPretNavigation.NumeroBordereau
+                                    </td>
+
+                                    <td>
+                                        @if (retard)
+                                        {
+                                            <span class="badge bg-danger">En retard</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Dans le délai</span>
+                                        }
+
+                                        <div>
+                                            @emprunt.DateEcheance.ToString("dd/MM/yyyy")
+                                        </div>
+                                    </td>
+
+                                    <td style="min-width: 300px;">
+                                        <form method="post"
+                                              asp-page-handler="Enregistrer"
+                                              class="border rounded p-3">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="CodeLignePret"
+                                                   value="@emprunt.CodeLignePret" />
+
+                                            <input type="hidden"
+                                                   name="Recherche"
+                                                   value="@Model.Recherche" />
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    État constaté
+                                                </label>
+
+                                                <select name="EtatRetour"
+                                                        class="form-select"
+                                                        required>
+                                                    <option value="BON">Bon</option>
+                                                    <option value="ABIME">Abîmé</option>
+                                                    <option value="DEGRADE">Dégradé</option>
+                                                    <option value="INCOMPLET">Incomplet</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Statut après contrôle
+                                                </label>
+
+                                                <select name="StatutApresControle"
+                                                        class="form-select"
+                                                        required>
+                                                    <option value="DISPONIBLE">
+                                                        Disponible
+                                                    </option>
+                                                    <option value="EN_REPARATION">
+                                                        En réparation
+                                                    </option>
+                                                    <option value="A_VERIFIER">
+                                                        À vérifier
+                                                    </option>
+                                                    <option value="RETIRE">
+                                                        Retiré du service
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Observations sur le livre
+                                                </label>
+
+                                                <textarea name="Observations"
+                                                          class="form-control"
+                                                          rows="2"
+                                                          maxlength="1000"
+                                                          placeholder="État des pages, couverture, pièces manquantes..."></textarea>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Observations du bordereau
+                                                </label>
+
+                                                <textarea name="ObservationsBordereau"
+                                                          class="form-control"
+                                                          rows="2"
+                                                          maxlength="1000"></textarea>
+                                            </div>
+
+                                            <button type="submit"
+                                                    class="btn btn-success w-100"
+                                                    onclick="return confirm('Confirmer le retour de cet exemplaire ?');">
+                                                Enregistrer le retour
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header py-3">
+            <h2 class="h5 mb-0">Derniers bordereaux de retour</h2>
+        </div>
+
+        <div class="card-body">
+            @if (Model.RetoursRecents.Count == 0)
+            {
+                <p class="text-muted mb-0">
+                    Aucun retour n'a encore été enregistré.
+                </p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>Date</th>
+                                <th>Lecteur</th>
+                                <th>Livres retournés</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var retour in Model.RetoursRecents)
+                            {
+                                <tr>
+                                    <td>@retour.NumeroBordereau</td>
+                                    <td>@retour.DateRetour.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@retour.CodeLecteurNavigation.NumeroLecteur</td>
+                                    <td>@retour.LignesRetours.Count</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

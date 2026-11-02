@@ -1,0 +1,16 @@
+﻿@page
+@model DiagnosticBaseModel
+
+@{
+    ViewData["Title"] = "Diagnostic PostgreSQL";
+}
+
+<h1>Diagnostic de la base de données</h1>
+
+@if (Model.TestEffectue)
+{
+    <p>
+        <strong>Résultat :</strong>
+        @Model.Message
+    </p>
+}

@@ -1,0 +1,93 @@
+﻿@page "{id:int}"
+@model bibliotheque_mayidi.Pages.Documents.EditModel
+
+@{
+    ViewData["Title"] = "Modifier un document";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h2">Modifier un document</h1>
+        <p class="text-muted">
+            Bibliothèque du Grand Séminaire de Mayidi
+        </p>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Informations du document</h2>
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-4">
+                <label class="form-label">Titre du document</label>
+                <input class="form-control"
+                       value="@Model.Document.Titre"
+                       readonly />
+                <div class="form-text">
+                    Cette page permet actuellement de modifier la collection.
+                </div>
+            </div>
+
+            <form method="post" asp-route-id="@Model.Document.CodeDocument">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="CodeCollection"
+                           class="form-label">
+                        Collection
+                    </label>
+
+                    <select asp-for="CodeCollection"
+                            class="form-select">
+
+                        <option value="">
+                            Aucune collection
+                        </option>
+
+                        @foreach (var collection in Model.Collections)
+                        {
+                            <option value="@collection.CodeCollection">
+                                @collection.NomCollection
+                            </option>
+                        }
+                    </select>
+
+                    <span asp-validation-for="CodeCollection"
+                          class="text-danger">
+                    </span>
+
+                    <div class="form-text">
+                        Sélectionne la collection à laquelle appartient
+                        ce document.
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    <button type="submit" class="btn btn-primary">
+                        Enregistrer les modifications
+                    </button>
+
+                    <a asp-page="./Index"
+                       class="btn btn-outline-secondary">
+                        Annuler
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

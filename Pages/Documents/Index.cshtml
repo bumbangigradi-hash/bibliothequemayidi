@@ -1,0 +1,423 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Documents.CreateModel
+
+@{
+    ViewData["Title"] = "Ajouter un document";
+}
+
+<div class="container py-4">
+
+    <!-- EN-TÊTE -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Ajouter un document</h1>
+            <p class="text-muted mb-0">
+                Bibliothèque du Grand Séminaire Saint Robert Bellarmin de Mayidi
+            </p>
+        </div>
+
+        <a href="/Documents/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Retour au catalogue
+        </a>
+    </div>
+
+    <form method="post" class="card shadow-sm">
+
+        <div class="card-body p-4">
+
+            <div asp-validation-summary="All"
+                 class="alert alert-danger">
+            </div>
+
+            <!-- 1. INFORMATIONS DU DOCUMENT -->
+            <h5 class="mb-3">
+                <i class="bi bi-book"></i> 1. Informations bibliographiques
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-8">
+                    <label asp-for="Input.Titre" class="form-label">
+                        Titre du document *
+                    </label>
+                    <input asp-for="Input.Titre"
+                           class="form-control"
+                           placeholder="Titre principal du document" />
+                    <span asp-validation-for="Input.Titre"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.SousTitre" class="form-label">
+                        Sous-titre
+                    </label>
+                    <input asp-for="Input.SousTitre"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeTypeDocument" class="form-label">
+                        Type de document *
+                    </label>
+                    <select asp-for="Input.CodeTypeDocument"
+                            class="form-select">
+                        <option value="">-- Choisir le type --</option>
+                        @foreach (var type in Model.Types)
+                        {
+                            <option value="@type.CodeTypeDocument">
+                                @type.NomTypeDocument
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.CodeTypeDocument"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeCollection" class="form-label">
+                        Collection
+                    </label>
+                    <select asp-for="Input.CodeCollection"
+                            class="form-select">
+                        <option value="">-- Aucune collection --</option>
+                        @foreach (var collection in Model.Collections)
+                        {
+                            <option value="@collection.CodeCollection">
+                                @collection.NomCollection
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeEditeur" class="form-label">
+                        Maison d'édition
+                    </label>
+                    <select asp-for="Input.CodeEditeur"
+                            class="form-select">
+                        <option value="">-- Aucun éditeur --</option>
+                        @foreach (var editeur in Model.Editeurs)
+                        {
+                            <option value="@editeur.CodeEditeur">
+                                @editeur.NomEditeur
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.IsbnIssn" class="form-label">
+                        ISBN / ISSN
+                    </label>
+                    <input asp-for="Input.IsbnIssn"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Edition" class="form-label">
+                        Édition
+                    </label>
+                    <input asp-for="Input.Edition"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.LieuPublication" class="form-label">
+                        Lieu de publication
+                    </label>
+                    <input asp-for="Input.LieuPublication"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.AnneePublication" class="form-label">
+                        Année de publication
+                    </label>
+                    <input asp-for="Input.AnneePublication"
+                           type="number"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.Langue" class="form-label">
+                        Langue
+                    </label>
+                    <input asp-for="Input.Langue"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.NombrePages" class="form-label">
+                        Nombre de pages
+                    </label>
+                    <input asp-for="Input.NombrePages"
+                           type="number"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="Input.Resume" class="form-label">
+                        Résumé du document
+                    </label>
+                    <textarea asp-for="Input.Resume"
+                              class="form-control"
+                              rows="4"></textarea>
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="Input.MotsCles" class="form-label">
+                        Mots-clés
+                    </label>
+                    <input asp-for="Input.MotsCles"
+                           class="form-control"
+                           placeholder="Ex. Philosophie, théologie, Afrique..." />
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-check">
+                        <input asp-for="Input.EmpruntAutorise"
+                               class="form-check-input" />
+                        <label asp-for="Input.EmpruntAutorise"
+                               class="form-check-label">
+                            Autoriser l'emprunt de ce document
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- 2. AUTEUR -->
+            <h5 class="mb-3">
+                <i class="bi bi-person"></i> 2. Informations sur l'auteur
+            </h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label asp-for="Input.NomAuteur" class="form-label">
+                        Nom de l'auteur *
+                    </label>
+                    <input asp-for="Input.NomAuteur"
+                           class="form-control" />
+                    <span asp-validation-for="Input.NomAuteur"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.PrenomAuteur" class="form-label">
+                        Prénom
+                    </label>
+                    <input asp-for="Input.PrenomAuteur"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.DatesAuteur" class="form-label">
+                        Dates de l'auteur
+                    </label>
+                    <input asp-for="Input.DatesAuteur"
+                           class="form-control"
+                           placeholder="Ex. 1900-1980" />
+                </div>
+
+                <div class="col-md-12">
+                    <label asp-for="Input.NoticeBiographique"
+                           class="form-label">
+                        Notice biographique
+                    </label>
+                    <textarea asp-for="Input.NoticeBiographique"
+                              class="form-control"
+                              rows="3"></textarea>
+                </div>
+
+            </div>
+
+            <hr class="my-4" />
+
+            <!-- 3. LOCALISATION -->
+            <h5 class="mb-3">
+                <i class="bi bi-geo-alt"></i> 3. Localisation physique
+            </h5>
+
+            <div class="alert alert-info">
+                Sélectionne d'abord le rayon, ensuite l'étagère et enfin
+                la place où sera rangé l'exemplaire.
+            </div>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeRayon" class="form-label">
+                        Rayon *
+                    </label>
+                    <select asp-for="Input.CodeRayon"
+                            class="form-select"
+                            id="rayon">
+                        <option value="">-- Choisir un rayon --</option>
+                        @foreach (var rayon in Model.Rayons)
+                        {
+                            <option value="@rayon.CodeRayon">
+                                @rayon.NomRayon
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.CodeRayon"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeEtagere" class="form-label">
+                        Étagère *
+                    </label>
+                    <select asp-for="Input.CodeEtagere"
+                            class="form-select"
+                            id="etagere">
+                        <option value="">-- Choisir une étagère --</option>
+                        @foreach (var etagere in Model.Etageres)
+                        {
+                            <option value="@etagere.CodeEtagere"
+                                    data-rayon="@etagere.CodeRayon">
+                                Étagère @etagere.NumeroEtagereRoman
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.CodeEtagere"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="Input.CodeEmplacement"
+                           class="form-label">
+                        Place *
+                    </label>
+                    <select asp-for="Input.CodeEmplacement"
+                            class="form-select"
+                            id="emplacement">
+                        <option value="">-- Choisir une place --</option>
+                        @foreach (var emplacement in Model.Emplacements)
+                        {
+                            <option value="@emplacement.CodeEmplacement"
+                                    data-etagere="@emplacement.CodeEtagere">
+                                Place @emplacement.NumeroPlace
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="Input.CodeEmplacement"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.Cote" class="form-label">
+                        Cote *
+                    </label>
+                    <input asp-for="Input.Cote"
+                           class="form-control"
+                           placeholder="Ex. PHILO-X/1" />
+                    <span asp-validation-for="Input.Cote"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Input.NumeroInventaire"
+                           class="form-label">
+                        Numéro d'inventaire *
+                    </label>
+                    <input asp-for="Input.NumeroInventaire"
+                           class="form-control"
+                           placeholder="Ex. MAY-2026-0001" />
+                    <span asp-validation-for="Input.NumeroInventaire"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BOUTONS -->
+        <div class="card-footer bg-white p-3">
+            <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                <a href="/Documents/Index"
+                   class="btn btn-outline-secondary">
+                    Annuler
+                </a>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i>
+                    Enregistrer le document
+                </button>
+
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const rayon = document.getElementById("rayon");
+            const etagere = document.getElementById("etagere");
+            const emplacement = document.getElementById("emplacement");
+
+            function filtrerEtageres() {
+
+                const codeRayon = rayon.value;
+                const valeurActuelle = etagere.value;
+
+                Array.from(etagere.options).forEach(option => {
+
+                    if (option.value === "") {
+                        option.hidden = false;
+                        return;
+                    }
+
+                    const correspond = option.dataset.rayon === codeRayon;
+                    option.hidden = !correspond;
+                });
+
+                if (valeurActuelle &&
+                    etagere.selectedOptions[0]?.hidden) {
+                    etagere.value = "";
+                }
+
+                filtrerEmplacements();
+            }
+
+            function filtrerEmplacements() {
+
+                const codeEtagere = etagere.value;
+
+                Array.from(emplacement.options).forEach(option => {
+
+                    if (option.value === "") {
+                        option.hidden = false;
+                        return;
+                    }
+
+                    const correspond =
+                        option.dataset.etagere === codeEtagere;
+
+                    option.hidden = !correspond;
+                });
+
+                if (emplacement.value &&
+                    emplacement.selectedOptions[0]?.hidden) {
+                    emplacement.value = "";
+                }
+            }
+
+            rayon.addEventListener("change", filtrerEtageres);
+            etagere.addEventListener("change", filtrerEmplacements);
+
+            filtrerEtageres();
+        });
+    </script>
+}

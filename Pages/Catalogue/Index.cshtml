@@ -1,0 +1,285 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Catalogue.IndexModel
+
+@{
+    ViewData["Title"] = "Catalogue de la bibliothèque";
+}
+
+<div class="container py-4">
+
+    <div class="text-center mb-4">
+        <h1 class="display-5">Catalogue de la bibliothèque</h1>
+        <p class="text-muted">Bibliothèque du Grand Séminaire de Mayidi</p>
+        <p>
+            Recherchez des livres, des revues et d'autres documents
+            disponibles dans notre bibliothèque.
+        </p>
+    </div>
+
+    @if (TempData["ConfirmationReservation"] is string confirmation)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading">Réservation enregistrée</h5>
+            <p class="mb-2">@confirmation</p>
+            <a asp-page="/EspaceLecteur/MesReservations"
+               class="btn btn-success btn-sm">
+                Consulter mes réservations
+            </a>
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    }
+
+    @if (TempData["ErreurReservation"] is string erreur)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @erreur
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Recherche" class="form-label">
+                            Recherche
+                        </label>
+                        <input asp-for="Recherche"
+                               class="form-control"
+                               placeholder="Titre, auteur, ISBN ou mot-clé..." />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="TypeSelectionne" class="form-label">
+                            Type de document
+                        </label>
+                        <select asp-for="TypeSelectionne" class="form-select">
+                            <option value="">Tous les types</option>
+                            @foreach (var type in Model.Types)
+                            {
+                                <option value="@type.CodeTypeDocument">
+                                    @type.NomTypeDocument
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CollectionSelectionnee" class="form-label">
+                            Collection
+                        </label>
+                        <select asp-for="CollectionSelectionnee" class="form-select">
+                            <option value="">Toutes les collections</option>
+                            @foreach (var collection in Model.Collections)
+                            {
+                                <option value="@collection.CodeCollection">
+                                    @collection.NomCollection
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="RayonSelectionne" class="form-label">
+                            Rayon
+                        </label>
+                        <select asp-for="RayonSelectionne" class="form-select">
+                            <option value="">Tous les rayons</option>
+                            @foreach (var rayon in Model.Rayons)
+                            {
+                                <option value="@rayon.CodeRayon">
+                                    @rayon.NomRayon
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DisponibiliteSelectionnee"
+                               class="form-label">
+                            Disponibilité
+                        </label>
+                        <select asp-for="DisponibiliteSelectionnee"
+                                class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="disponible">Disponible pour le prêt</option>
+                            <option value="emprunte">Emprunté</option>
+                            <option value="consultation">Consultation sur place</option>
+                            <option value="indisponible">Non disponible pour le prêt</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            Rechercher
+                        </button>
+                        <a asp-page="/Catalogue/Index"
+                           class="btn btn-outline-secondary">
+                            Réinitialiser
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 mb-0">Résultats du catalogue</h2>
+        <span class="badge bg-secondary">
+            @Model.Documents.Count document(s)
+        </span>
+    </div>
+
+    @if (Model.Documents.Count == 0)
+    {
+        <div class="alert alert-info">
+            Aucun document ne correspond à votre recherche.
+            Essayez d'autres mots-clés ou modifiez les filtres.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var document in Model.Documents)
+            {
+                var exemplairesActifs = document.Exemplaires
+                    .Where(e => e.DateRetrait == null)
+                    .ToList();
+
+                var disponibles = exemplairesActifs.Count(e =>
+                    e.StatutExemplaire == "DISPONIBLE");
+
+                var auteurs = string.Join(", ",
+                    document.DocumentsAuteurs
+                        .OrderBy(a => a.OrdreAffichage)
+                        .Select(a => string.Join(" ",
+                            new[]
+                            {
+                                a.CodeAuteurNavigation.PrenomAuteur,
+                                a.CodeAuteurNavigation.NomAuteur
+                            }.Where(n =>
+                                !string.IsNullOrWhiteSpace(n)))));
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+
+                            <div>
+                                <span class="badge bg-light text-dark mb-2">
+                                    @document.CodeTypeDocumentNavigation.NomTypeDocument
+                                </span>
+
+                                <h3 class="h5 card-title">
+                                    @document.Titre
+                                </h3>
+
+                                @if (!string.IsNullOrWhiteSpace(document.SousTitre))
+                                {
+                                    <p class="text-muted mb-2">
+                                        @document.SousTitre
+                                    </p>
+                                }
+
+                                <p class="mb-2">
+                                    <strong>Collection :</strong>
+                                    @(document.CodeCollectionNavigation?.NomCollection
+                                        ?? "Non classé")
+                                </p>
+
+                                <p class="mb-2">
+                                    <strong>Auteur(s) :</strong>
+                                    @(string.IsNullOrWhiteSpace(auteurs)
+                                        ? "Non renseigné"
+                                        : auteurs)
+                                </p>
+
+                                @if (document.AnneePublication.HasValue)
+                                {
+                                    <p class="mb-2">
+                                        <strong>Année :</strong>
+                                        @document.AnneePublication
+                                    </p>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(document.IsbnIssn))
+                                {
+                                    <p class="mb-2">
+                                        <strong>ISBN/ISSN :</strong>
+                                        @document.IsbnIssn
+                                    </p>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(document.Resume))
+                                {
+                                    <p class="card-text">
+                                        @(document.Resume.Length > 160
+                                            ? document.Resume.Substring(0, 160) + "..."
+                                            : document.Resume)
+                                    </p>
+                                }
+
+                                <hr />
+
+                                @if (document.EmpruntAutorise &&
+                                     document.CodeTypeDocumentNavigation.EmpruntAutorise)
+                                {
+                                    <p class="mb-2">
+                                        <strong>Durée du prêt :</strong>
+                                        @document.CodeTypeDocumentNavigation.DureePretJours jour(s)
+                                    </p>
+                                }
+                                else
+                                {
+                                    <p class="mb-2">
+                                        <strong>Modalité :</strong>
+                                        Consultation sur place
+                                    </p>
+                                }
+
+                                <p class="mb-3">
+                                    <strong>Exemplaires disponibles :</strong>
+                                    @disponibles
+                                </p>
+                            </div>
+
+                            <div class="mt-auto">
+                                <form method="post"
+                                      asp-page-handler="Reserver"
+                                      asp-route-codeDocument="@document.CodeDocument">
+
+                                    <input type="hidden" name="Recherche"
+                                           value="@Model.Recherche" />
+                                    <input type="hidden" name="TypeSelectionne"
+                                           value="@Model.TypeSelectionne" />
+                                    <input type="hidden" name="CollectionSelectionnee"
+                                           value="@Model.CollectionSelectionnee" />
+                                    <input type="hidden" name="RayonSelectionne"
+                                           value="@Model.RayonSelectionne" />
+                                    <input type="hidden" name="DisponibiliteSelectionnee"
+                                           value="@Model.DisponibiliteSelectionnee" />
+
+                                    <button type="submit"
+                                            class="btn btn-primary w-100">
+                                        <span class="me-1">+</span>
+                                        Réserver ce document
+                                    </button>
+                                </form>
+
+                                <p class="small text-muted mt-2 mb-0">
+                                    La réservation doit être traitée par la bibliothèque.
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>

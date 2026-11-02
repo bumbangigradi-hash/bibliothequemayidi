@@ -1,0 +1,144 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Admin.InscriptionsModel
+
+@{
+    ViewData["Title"] = "Inscriptions des lecteurs";
+}
+
+<style>
+    body {
+        background: #f4f7f5;
+    }
+
+    .conteneur {
+        max-width: 1100px;
+        margin: 35px auto;
+        padding: 20px;
+    }
+
+    .entete {
+        background: #14532d;
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .carte {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.06);
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 13px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+        background: #f1f5f9;
+    }
+
+    .valider {
+        background: #15803d;
+        color: white;
+        padding: 9px 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .message {
+        background: #dcfce7;
+        color: #166534;
+        padding: 13px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .vide {
+        padding: 25px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .retour {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #166534;
+        text-decoration: none;
+    }
+</style>
+
+<div class="conteneur">
+    <a asp-page="/Index" class="retour">← Retour au tableau de bord</a>
+
+    <div class="entete">
+        <h1>Inscriptions des lecteurs</h1>
+        <p>Examinez les demandes et validez les nouveaux comptes.</p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    {
+        <div class="message" role="status">
+            @Model.Message
+        </div>
+    }
+
+    <div class="carte">
+        <h2>Demandes en attente (@Model.Inscriptions.Count)</h2>
+
+        @if (Model.Inscriptions.Count == 0)
+        {
+            <div class="vide">
+                Aucune inscription en attente de validation.
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Identifiant</th>
+                        <th>Date d'inscription</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var compte in Model.Inscriptions)
+                    {
+                        <tr>
+                            <td>@compte.NomUtilisateur @compte.Postnom</td>
+                            <td>@compte.Prenom</td>
+                            <td>@compte.Identifiant</td>
+                            <td>@compte.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <form method="post"
+                                      asp-page-handler="Valider"
+                                      onsubmit="return confirm('Confirmer la validation de ce compte lecteur ?');">
+                                    <input type="hidden"
+                                           name="codeCompte"
+                                           value="@compte.CodeCompte" />
+
+                                    <button type="submit" class="valider">
+                                        Valider le compte
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

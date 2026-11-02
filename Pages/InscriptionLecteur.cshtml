@@ -1,0 +1,215 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.InscriptionLecteurModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Inscription lecteur";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Inscription - Bibliothèque de Mayidi</title>
+
+    <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 25px;
+                background: #f1f5f9;
+                color: #1e293b;
+                font-family: Arial, sans-serif;
+            }
+
+            main {
+                max-width: 760px;
+                margin: 20px auto;
+                padding: 30px;
+                background: white;
+                border-radius: 14px;
+                box-shadow: 0 8px 30px #00000010;
+            }
+
+            h1 {
+                color: #14532d;
+            }
+
+            .intro {
+                color: #64748b;
+            }
+
+            .grille {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 16px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: bold;
+            }
+
+            input, select {
+                width: 100%;
+                padding: 11px;
+                border: 1px solid #cbd5e1;
+                border-radius: 7px;
+                font-size: 15px;
+            }
+
+            .champ {
+                margin-bottom: 15px;
+            }
+
+            .largeur {
+                grid-column: 1 / -1;
+            }
+
+            button {
+                width: 100%;
+                padding: 13px;
+                border: 0;
+                border-radius: 7px;
+                background: #14532d;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            .message {
+                padding: 14px;
+                margin-bottom: 20px;
+                border-radius: 7px;
+                background: #dcfce7;
+                color: #166534;
+            }
+
+            .erreurs {
+                color: #b91c1c;
+            }
+
+            a {
+                color: #166534;
+            }
+
+            @@media (max-width: 600px) {
+                .grille {
+                    grid-template-columns: 1fr;
+                }
+
+                .largeur {
+                    grid-column: auto;
+                }
+
+                main {
+                    padding: 20px;
+                }
+            }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Inscription d'un lecteur</h1>
+
+        <p class="intro">
+            Remplissez ce formulaire pour demander votre inscription.
+            Votre compte devra être validé par l'administration avant
+            que vous puissiez vous connecter.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div class="message" role="status">
+                @Model.Message
+                <p><a href="/Connexion">Aller à la connexion</a></p>
+            </div>
+        }
+        else
+        {
+            <div asp-validation-summary="ModelOnly" class="erreurs"></div>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="grille">
+                    <div class="champ">
+                        <label asp-for="Nom">Nom *</label>
+                        <input asp-for="Nom" autocomplete="family-name" />
+                        <span asp-validation-for="Nom" class="erreurs"></span>
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="Postnom">Postnom</label>
+                        <input asp-for="Postnom" />
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="Prenom">Prénom</label>
+                        <input asp-for="Prenom" autocomplete="given-name" />
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="MatriculeSeminaire">Matricule du séminaire</label>
+                        <input asp-for="MatriculeSeminaire" />
+                        <span asp-validation-for="MatriculeSeminaire" class="erreurs"></span>
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="CategorieLecteur">Catégorie de lecteur *</label>
+                        <select asp-for="CategorieLecteur">
+                            <option value="">-- Choisir --</option>
+                            <option value="SEMINARISTE">Séminariste</option>
+                            <option value="FORMATEUR">Formateur</option>
+                            <option value="PERSONNEL">Personnel</option>
+                            <option value="EXTERNE">Lecteur externe</option>
+                        </select>
+                        <span asp-validation-for="CategorieLecteur" class="erreurs"></span>
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="InstitutionOrigine">Institution d'origine</label>
+                        <input asp-for="InstitutionOrigine" />
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="Identifiant">Identifiant souhaité *</label>
+                        <input asp-for="Identifiant" autocomplete="username" />
+                        <span asp-validation-for="Identifiant" class="erreurs"></span>
+                    </div>
+
+                    <div class="champ">
+                        <label asp-for="MotDePasse">Mot de passe *</label>
+                        <input asp-for="MotDePasse" type="password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="MotDePasse" class="erreurs"></span>
+                    </div>
+
+                    <div class="champ largeur">
+                        <label asp-for="ConfirmationMotDePasse">
+                            Confirmer le mot de passe *
+                        </label>
+                        <input asp-for="ConfirmationMotDePasse" type="password"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmationMotDePasse"
+                              class="erreurs"></span>
+                    </div>
+
+                    <div class="champ largeur">
+                        <button type="submit">Envoyer ma demande d'inscription</button>
+                    </div>
+                </div>
+            </form>
+        }
+
+        <p><a href="/Connexion">Déjà inscrit ? Se connecter</a></p>
+    </main>
+</body>
+</html>

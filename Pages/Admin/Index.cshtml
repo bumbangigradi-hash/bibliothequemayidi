@@ -1,0 +1,587 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Admin.IndexModel
+
+@{
+    ViewData["Title"] = "Administration";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Administration - Bibliothèque Mayidi</title>
+
+    <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+                background: #f1f5f3;
+                color: #1e293b;
+            }
+
+            /* BARRE LATERALE */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 260px;
+                height: 100vh;
+                background: #14532d;
+                color: white;
+                padding: 25px 18px;
+                overflow-y: auto;
+                z-index: 100;
+            }
+
+            .logo {
+                text-align: center;
+                padding-bottom: 28px;
+                border-bottom: 1px solid rgba(255,255,255,.2);
+            }
+
+                .logo .symbole {
+                    font-size: 38px;
+                    margin-bottom: 10px;
+                }
+
+                .logo h2 {
+                    font-size: 17px;
+                    line-height: 1.5;
+                }
+
+                .logo p {
+                    font-size: 11px;
+                    margin-top: 8px;
+                    color: #bbf7d0;
+                }
+
+            .menu-titre {
+                color: #bbf7d0;
+                font-size: 11px;
+                font-weight: bold;
+                margin: 27px 10px 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .menu a {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                color: #ecfdf5;
+                text-decoration: none;
+                padding: 13px 12px;
+                border-radius: 8px;
+                margin-bottom: 5px;
+                font-size: 14px;
+                transition: .2s;
+            }
+
+                .menu a:hover,
+                .menu a.active {
+                    background: #166534;
+                }
+
+            .menu .icone {
+                font-size: 19px;
+                width: 25px;
+                text-align: center;
+            }
+
+            .deconnexion {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255,255,255,.2);
+            }
+
+                .deconnexion button {
+                    width: 100%;
+                    padding: 12px;
+                    border: none;
+                    border-radius: 7px;
+                    background: #991b1b;
+                    color: white;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+
+            /* CONTENU PRINCIPAL */
+            .principal {
+                margin-left: 260px;
+                padding: 30px;
+                min-height: 100vh;
+            }
+
+            .barre-haut {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+                .barre-haut h1 {
+                    font-size: 25px;
+                    color: #14532d;
+                }
+
+                .barre-haut p {
+                    color: #64748b;
+                    margin-top: 7px;
+                    font-size: 14px;
+                }
+
+            .profil {
+                background: white;
+                padding: 12px 18px;
+                border-radius: 9px;
+                box-shadow: 0 2px 8px rgba(0,0,0,.04);
+                font-size: 14px;
+            }
+
+            /* BIENVENUE */
+            .bienvenue {
+                background: linear-gradient(120deg, #14532d, #15803d);
+                padding: 30px;
+                border-radius: 14px;
+                color: white;
+                margin-bottom: 30px;
+            }
+
+                .bienvenue h2 {
+                    font-size: 23px;
+                    margin-bottom: 10px;
+                }
+
+                .bienvenue p {
+                    color: #dcfce7;
+                    line-height: 1.6;
+                }
+
+            /* STATISTIQUES */
+            .statistiques {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 18px;
+                margin-bottom: 35px;
+            }
+
+            .statistique {
+                background: white;
+                padding: 23px;
+                border-radius: 12px;
+                box-shadow: 0 3px 12px rgba(0,0,0,.04);
+                border-left: 4px solid #15803d;
+            }
+
+                .statistique .icone {
+                    font-size: 27px;
+                    margin-bottom: 14px;
+                }
+
+                .statistique h3 {
+                    font-size: 27px;
+                    color: #14532d;
+                    margin-bottom: 7px;
+                }
+
+                .statistique p {
+                    font-size: 13px;
+                    color: #64748b;
+                }
+
+            /* TITRES */
+            .section-titre {
+                margin: 35px 0 18px;
+            }
+
+                .section-titre h2 {
+                    color: #14532d;
+                    font-size: 20px;
+                    margin-bottom: 7px;
+                }
+
+                .section-titre p {
+                    color: #64748b;
+                    font-size: 13px;
+                }
+
+            /* CARTES */
+            .cartes {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+
+            .carte {
+                background: white;
+                padding: 23px;
+                border-radius: 12px;
+                box-shadow: 0 3px 12px rgba(0,0,0,.04);
+                transition: .2s;
+                border: 1px solid #e2e8f0;
+            }
+
+                .carte:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 7px 18px rgba(0,0,0,.08);
+                }
+
+                .carte .icone {
+                    font-size: 32px;
+                    margin-bottom: 15px;
+                }
+
+                .carte h3 {
+                    font-size: 16px;
+                    color: #14532d;
+                    margin-bottom: 9px;
+                }
+
+                .carte p {
+                    color: #64748b;
+                    font-size: 13px;
+                    line-height: 1.6;
+                    min-height: 42px;
+                }
+
+                .carte a {
+                    display: inline-block;
+                    margin-top: 18px;
+                    padding: 10px 14px;
+                    background: #ecfdf5;
+                    color: #166534;
+                    text-decoration: none;
+                    font-weight: bold;
+                    font-size: 12px;
+                    border-radius: 7px;
+                }
+
+                    .carte a:hover {
+                        background: #dcfce7;
+                    }
+
+            /* PIED DE PAGE */
+            .pied {
+                margin-top: 45px;
+                padding: 20px;
+                text-align: center;
+                color: #94a3b8;
+                font-size: 12px;
+                border-top: 1px solid #e2e8f0;
+            }
+
+            /* RESPONSIVE */
+            .menu-mobile {
+                display: none;
+            }
+
+            @@media(max-width: 1100px) {
+                .statistiques {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .cartes {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            @@media(max-width: 750px) {
+                .sidebar {
+                    position: relative;
+                    width: 100%;
+                    height: auto;
+                }
+
+                .logo {
+                    padding-bottom: 15px;
+                }
+
+                .menu {
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 5px;
+                }
+
+                .menu-titre {
+                    margin-top: 20px;
+                }
+
+                .principal {
+                    margin-left: 0;
+                    padding: 18px;
+                }
+
+                .statistiques {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                }
+
+                .cartes {
+                    grid-template-columns: 1fr;
+                }
+
+                .bienvenue {
+                    padding: 22px;
+                }
+            }
+
+            @@media(max-width: 400px) {
+                .statistiques {
+                    grid-template-columns: 1fr;
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- BARRE LATERALE -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="symbole">📚</div>
+
+            <h2>
+                BIBLIOTHÈQUE DU GRAND SÉMINAIRE
+                SAINT ROBERT BELLARMIN
+            </h2>
+
+            <p>MAYIDI - ADMINISTRATION</p>
+        </div>
+
+        <div class="menu">
+
+            <div class="menu-titre">Administration</div>
+
+            <a asp-page="/Admin/Index" class="active">
+                <span class="icone">🏠</span>
+                Tableau de bord
+            </a>
+
+            <a asp-page="/Admin/Inscriptions">
+                <span class="icone">📝</span>
+                Inscriptions lecteurs
+            </a>
+
+            <a asp-page="/Admin/Utilisateurs">
+                <span class="icone">👥</span>
+                Gestion du personnel
+            </a>
+
+            <a asp-page="/Admin/CreerUtilisateur">
+                <span class="icone">➕</span>
+                Créer un utilisateur
+            </a>
+
+            <div class="menu-titre">Catalogue et bibliothèque</div>
+
+            <a asp-page="/Index">
+                <span class="icone">📖</span>
+                Accueil général
+            </a>
+
+            <div class="menu-titre">Compte</div>
+
+            <a asp-page="/Profil/Index">
+                <span class="icone">👤</span>
+                Mon profil
+            </a>
+
+        </div>
+
+        <div class="deconnexion">
+            <form method="post" asp-page="/Deconnexion">
+                <button type="submit">
+                    ↪ Déconnexion
+                </button>
+            </form>
+        </div>
+
+    </aside>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="principal">
+
+        <header class="barre-haut">
+
+            <div>
+                <h1>Tableau de bord administratif</h1>
+                <p>Gestion générale de la bibliothèque</p>
+            </div>
+
+            <div class="profil">
+                👤 @User.Identity?.Name
+                <br />
+                <small>Administrateur</small>
+            </div>
+
+        </header>
+
+        <!-- BIENVENUE -->
+        <section class="bienvenue">
+
+            <h2>Bienvenue dans votre espace d'administration</h2>
+
+            <p>
+                Vous disposez ici des outils nécessaires pour administrer
+                les comptes des lecteurs, gérer le personnel et superviser
+                les activités de la bibliothèque.
+            </p>
+
+        </section>
+
+        <!-- STATISTIQUES -->
+        <section class="statistiques">
+
+            <div class="statistique">
+                <div class="icone">⏳</div>
+                <h3>@Model.InscriptionsEnAttente</h3>
+                <p>Inscriptions en attente</p>
+            </div>
+
+            <div class="statistique">
+                <div class="icone">🎓</div>
+                <h3>@Model.TotalLecteurs</h3>
+                <p>Total des lecteurs inscrits</p>
+            </div>
+
+            <div class="statistique">
+                <div class="icone">👥</div>
+                <h3>@Model.TotalPersonnel</h3>
+                <p>Membres du personnel</p>
+            </div>
+
+            <div class="statistique">
+                <div class="icone">✅</div>
+                <h3>@Model.PersonnelActif</h3>
+                <p>Personnel actif</p>
+            </div>
+
+        </section>
+
+        <!-- GESTION DES COMPTES -->
+        <section>
+
+            <div class="section-titre">
+                <h2>Gestion des comptes</h2>
+                <p>Inscription, validation et administration des utilisateurs.</p>
+            </div>
+
+            <div class="cartes">
+
+                <div class="carte">
+                    <div class="icone">📝</div>
+                    <h3>Inscriptions des lecteurs</h3>
+                    <p>
+                        Consultez les demandes d'inscription et validez
+                        les nouveaux lecteurs.
+                    </p>
+
+                    <a asp-page="/Admin/Inscriptions">
+                        Consulter les demandes →
+                    </a>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">👨‍💼</div>
+                    <h3>Gestion du personnel</h3>
+                    <p>
+                        Consultez les comptes des bibliothécaires,
+                        gestionnaires et responsables.
+                    </p>
+
+                    <a asp-page="/Admin/Utilisateurs">
+                        Gérer le personnel →
+                    </a>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">➕</div>
+                    <h3>Créer un utilisateur</h3>
+                    <p>
+                        Créez un compte pour un bibliothécaire ou
+                        un autre membre du personnel.
+                    </p>
+
+                    <a asp-page="/Admin/CreerUtilisateur">
+                        Créer un compte →
+                    </a>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- BIBLIOTHEQUE -->
+        <section>
+
+            <div class="section-titre">
+                <h2>Accès à la bibliothèque</h2>
+                <p>Accédez aux espaces généraux de votre application.</p>
+            </div>
+
+            <div class="cartes">
+
+                <div class="carte">
+                    <div class="icone">📚</div>
+                    <h3>Catalogue documentaire</h3>
+                    <p>
+                        Accédez à l'accueil général pour consulter
+                        les fonctionnalités disponibles.
+                    </p>
+
+                    <a asp-page="/Index">
+                        Accéder à l'accueil →
+                    </a>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">👤</div>
+                    <h3>Mon compte</h3>
+                    <p>
+                        Consultez votre espace personnel et
+                        vos informations de connexion.
+                    </p>
+
+                    <a asp-page="/Profil/Index">
+                        Mon profil →
+                    </a>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">🔐</div>
+                    <h3>Sécurité</h3>
+                    <p>
+                        Fermez votre session lorsque vous avez
+                        terminé votre travail.
+                    </p>
+
+                    <a asp-page="/Deconnexion">
+                        Se déconnecter →
+                    </a>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer class="pied">
+            © @DateTime.Now.Year - Bibliothèque du Grand Séminaire
+            Saint Robert Bellarmin de Mayidi.
+            Tous droits réservés.
+        </footer>
+
+    </main>
+
+</body>
+</html>

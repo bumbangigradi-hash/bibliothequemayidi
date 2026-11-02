@@ -1,0 +1,169 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.EspaceLecteur.IndexModel
+
+@{
+    ViewData["Title"] = "Mon espace lecteur";
+}
+
+<div class="container py-4">
+
+    <div class="p-4 mb-4 bg-light rounded-3">
+        <h1 class="h2">Mon espace lecteur</h1>
+
+        <p class="mb-1">
+            Bienvenue,
+            <strong>@Model.NomLecteur</strong> !
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.NumeroLecteur))
+        {
+            <p class="text-muted mb-1">
+                Numéro de lecteur : @Model.NumeroLecteur
+            </p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.StatutLecteur))
+        {
+            <p class="text-muted mb-0">
+                Statut : @Model.StatutLecteur
+            </p>
+        }
+
+        <p class="mt-3 mb-0">
+            Retrouvez ici vos emprunts, vos réservations et vos notifications.
+        </p>
+    </div>
+
+    <h2 class="h4 mb-3">Ma situation</h2>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-primary">
+                <div class="card-body">
+                    <div class="text-muted">Emprunts en cours</div>
+                    <div class="display-6 fw-bold text-primary">
+                        @Model.EmpruntsEnCours
+                    </div>
+                    <a asp-page="/EspaceLecteur/MesEmprunts"
+                       asp-route-Filtre="EN_COURS"
+                       class="btn btn-outline-primary btn-sm mt-2">
+                        Voir mes emprunts
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-danger">
+                <div class="card-body">
+                    <div class="text-muted">Emprunts en retard</div>
+                    <div class="display-6 fw-bold text-danger">
+                        @Model.EmpruntsEnRetard
+                    </div>
+                    <a asp-page="/EspaceLecteur/MesEmprunts"
+                       asp-route-Filtre="EN_RETARD"
+                       class="btn btn-outline-danger btn-sm mt-2">
+                        Voir les retards
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body">
+                    <div class="text-muted">Réservations en attente</div>
+                    <div class="display-6 fw-bold text-warning">
+                        @Model.ReservationsEnAttente
+                    </div>
+                    <a asp-page="/EspaceLecteur/MesReservations"
+                       asp-route-Filtre="EN_ATTENTE"
+                       class="btn btn-outline-warning btn-sm mt-2">
+                        Voir mes réservations
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-success">
+                <div class="card-body">
+                    <div class="text-muted">Documents prêts à retirer</div>
+                    <div class="display-6 fw-bold text-success">
+                        @Model.DocumentsAPrendre
+                    </div>
+                    <a asp-page="/EspaceLecteur/MesReservations"
+                       asp-route-Filtre="PRETES"
+                       class="btn btn-outline-success btn-sm mt-2">
+                        Voir les documents
+                    </a>
+                    <p class="small text-muted mt-2 mb-0">
+                        Le délai de retrait est de 48 heures après notification
+                        de disponibilité, selon les règles de la bibliothèque.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-info">
+                <div class="card-body">
+                    <div class="text-muted">Notifications non lues</div>
+                    <div class="display-6 fw-bold text-info">
+                        @Model.NotificationsNonLues
+                    </div>
+                    <a asp-page="/EspaceLecteur/Notifications"
+                       asp-route-Filtre="NON_LUS"
+                       class="btn btn-outline-info btn-sm mt-2">
+                        Lire mes notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <h2 class="h4 mb-3">Accès rapide</h2>
+
+    <div class="list-group shadow-sm mb-4">
+
+        <a asp-page="/Catalogue/Index"
+           class="list-group-item list-group-item-action">
+            <strong>Consulter le catalogue</strong>
+            <div class="small text-muted">
+                Rechercher des livres, revues et autres documents.
+            </div>
+        </a>
+
+        <a asp-page="/EspaceLecteur/MesEmprunts"
+           class="list-group-item list-group-item-action">
+            <strong>Mes emprunts</strong>
+            <div class="small text-muted">
+                Consulter les échéances et les retours.
+            </div>
+        </a>
+
+        <a asp-page="/EspaceLecteur/MesReservations"
+           class="list-group-item list-group-item-action">
+            <strong>Mes réservations</strong>
+            <div class="small text-muted">
+                Suivre les demandes et les documents disponibles.
+            </div>
+        </a>
+
+        <a asp-page="/EspaceLecteur/Notifications"
+           class="list-group-item list-group-item-action">
+            <strong>Mes notifications</strong>
+            <div class="small text-muted">
+                Lire les messages de la bibliothèque.
+            </div>
+        </a>
+
+    </div>
+
+    <a asp-page="/Index" class="btn btn-outline-secondary">
+        Retour à l’accueil général
+    </a>
+
+</div>

@@ -1,0 +1,304 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Exemplaires.IndexModel
+
+@{
+    ViewData["Title"] = "Gestion des exemplaires";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Gestion des exemplaires</h1>
+            <p class="text-muted mb-0">
+                Inventaire physique et disponibilité des documents.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-page="/Documents/Index" class="btn btn-outline-secondary">
+                Catalogue
+            </a>
+
+            <a asp-page="./Create" class="btn btn-primary">
+                + Ajouter un exemplaire
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Succes"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Succes"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total exemplaires</div>
+                    <div class="fs-3 fw-bold">@Model.TotalExemplaires</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Disponibles</div>
+                    <div class="fs-3 fw-bold text-success">@Model.TotalDisponibles</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Empruntés</div>
+                    <div class="fs-3 fw-bold text-primary">@Model.TotalEmpruntes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Endommagés</div>
+                    <div class="fs-3 fw-bold text-danger">@Model.TotalEndommages</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-4">
+                        <label asp-for="Recherche" class="form-label">
+                            Recherche
+                        </label>
+                        <input asp-for="Recherche" class="form-control"
+                               placeholder="Titre, auteur, cote, inventaire, code-barres..." />
+                    </div>
+
+                    <div class="col-lg-3">
+                        <label asp-for="CollectionSelectionnee" class="form-label">
+                            Collection
+                        </label>
+                        <select asp-for="CollectionSelectionnee" class="form-select">
+                            <option value="">Toutes les collections</option>
+                            @foreach (var collection in Model.Collections)
+                            {
+                                <option value="@collection.CodeCollection">
+                                    @collection.NomCollection
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <label asp-for="RayonSelectionne" class="form-label">
+                            Rayon
+                        </label>
+                        <select asp-for="RayonSelectionne" class="form-select">
+                            <option value="">Tous les rayons</option>
+                            @foreach (var rayon in Model.Rayons)
+                            {
+                                <option value="@rayon.CodeRayon">
+                                    @rayon.NomRayon
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2">
+                        <label asp-for="StatutSelectionne" class="form-label">
+                            Statut
+                        </label>
+                        <select asp-for="StatutSelectionne" class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="DISPONIBLE">Disponible</option>
+                            <option value="RESERVE">Réservé</option>
+                            <option value="EMPRUNTE">Emprunté</option>
+                            <option value="CONSULTATION">Consultation</option>
+                            <option value="ENDOMMAGE">Endommagé</option>
+                            <option value="PERDU">Perdu</option>
+                            <option value="RETIRE">Retiré</option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-1 d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            Filtrer
+                        </button>
+                    </div>
+
+                    <div class="col-12">
+                        <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">
+                            Effacer tous les filtres
+                        </a>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <strong>Liste des exemplaires</strong>
+            <span class="text-muted">
+                — @Model.Exemplaires.Count résultat(s)
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Inventaire</th>
+                        <th>Titre du document</th>
+                        <th>Collection</th>
+                        <th>Auteur(s)</th>
+                        <th>Cote</th>
+                        <th>Code-barres</th>
+                        <th>État matériel</th>
+                        <th>Statut</th>
+                        <th>Date d'acquisition</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Exemplaires.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <h2 class="h5">Aucun exemplaire trouvé</h2>
+                                <p class="text-muted mb-3">
+                                    Aucun exemplaire ne correspond aux critères
+                                    ou aucun exemplaire n'a encore été enregistré.
+                                </p>
+                                <a asp-page="./Create" class="btn btn-primary">
+                                    Ajouter un exemplaire
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var exemplaire in Model.Exemplaires)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    @exemplaire.NumeroInventaire
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @exemplaire.CodeDocumentNavigation.Titre
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(
+                                        exemplaire.CodeDocumentNavigation.IsbnIssn))
+                                    {
+                                        <small class="text-muted">
+                                            ISBN/ISSN :
+                                            @exemplaire.CodeDocumentNavigation.IsbnIssn
+                                        </small>
+                                    }
+                                </td>
+
+                                <td>
+                                    @(exemplaire.CodeDocumentNavigation.CodeCollectionNavigation?.NomCollection
+                                        ?? "Non classé")
+                                </td>
+
+                                <td>
+                                    @{
+                                        var auteurs = exemplaire
+                                            .CodeDocumentNavigation
+                                            .DocumentsAuteurs
+                                            .OrderBy(da => da.OrdreAffichage)
+                                            .Select(da =>
+                                                $"{da.CodeAuteurNavigation.PrenomAuteur} {da.CodeAuteurNavigation.NomAuteur}".Trim())
+                                            .ToList();
+                                    }
+
+                                    @if (auteurs.Count > 0)
+                                    {
+                                        @string.Join(", ", auteurs)
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Non renseigné</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">@exemplaire.Cote</span>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(exemplaire.CodeBarres)
+                                        ? "—"
+                                        : exemplaire.CodeBarres)
+                                </td>
+
+                                <td>@exemplaire.EtatDocument</td>
+
+                                <td>
+                                    @switch (exemplaire.StatutExemplaire)
+                                    {
+                                        case "DISPONIBLE":
+                                            <span class="badge bg-success">Disponible</span>
+                                            break;
+                                        case "EMPRUNTE":
+                                            <span class="badge bg-primary">Emprunté</span>
+                                            break;
+                                        case "RESERVE":
+                                            <span class="badge bg-warning text-dark">Réservé</span>
+                                            break;
+                                        case "CONSULTATION":
+                                            <span class="badge bg-info text-dark">Consultation</span>
+                                            break;
+                                        case "ENDOMMAGE":
+                                            <span class="badge bg-danger">Endommagé</span>
+                                            break;
+                                        case "PERDU":
+                                            <span class="badge bg-dark">Perdu</span>
+                                            break;
+                                        case "RETIRE":
+                                            <span class="badge bg-secondary">Retiré</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">
+                                                @exemplaire.StatutExemplaire
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <td>
+                                    @(exemplaire.DateAcquisition?.ToString("dd/MM/yyyy") ?? "—")
+                                </td>
+
+                                <td class="text-center">
+                                    <a asp-page="./Details"
+                                       asp-route-id="@exemplaire.CodeExemplaire"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Détails
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
