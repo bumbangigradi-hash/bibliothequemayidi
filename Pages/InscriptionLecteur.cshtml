@@ -72,6 +72,13 @@
                 grid-column: 1 / -1;
             }
 
+            .aide {
+                display: block;
+                margin-top: 5px;
+                color: #64748b;
+                font-size: 12px;
+            }
+
             button {
                 width: 100%;
                 padding: 13px;
@@ -140,6 +147,7 @@
                 @Html.AntiForgeryToken()
 
                 <div class="grille">
+
                     <div class="champ">
                         <label asp-for="Nom">Nom *</label>
                         <input asp-for="Nom" autocomplete="family-name" />
@@ -157,13 +165,25 @@
                     </div>
 
                     <div class="champ">
-                        <label asp-for="MatriculeSeminaire">Matricule du séminaire</label>
+                        <label asp-for="MatriculeSeminaire">
+                            Matricule du séminaire (facultatif)
+                        </label>
+
                         <input asp-for="MatriculeSeminaire" />
-                        <span asp-validation-for="MatriculeSeminaire" class="erreurs"></span>
+
+                        <small class="aide">
+                            Vous pouvez laisser ce champ vide si vous ne possédez pas de matricule.
+                        </small>
+
+                        <span asp-validation-for="MatriculeSeminaire"
+                              class="erreurs"></span>
                     </div>
 
                     <div class="champ">
-                        <label asp-for="CategorieLecteur">Catégorie de lecteur *</label>
+                        <label asp-for="CategorieLecteur">
+                            Catégorie de lecteur *
+                        </label>
+
                         <select asp-for="CategorieLecteur">
                             <option value="">-- Choisir --</option>
                             <option value="SEMINARISTE">Séminariste</option>
@@ -171,45 +191,62 @@
                             <option value="PERSONNEL">Personnel</option>
                             <option value="EXTERNE">Lecteur externe</option>
                         </select>
-                        <span asp-validation-for="CategorieLecteur" class="erreurs"></span>
+
+                        <span asp-validation-for="CategorieLecteur"
+                              class="erreurs"></span>
                     </div>
 
                     <div class="champ">
-                        <label asp-for="InstitutionOrigine">Institution d'origine</label>
+                        <label asp-for="InstitutionOrigine">
+                            Institution d'origine
+                        </label>
                         <input asp-for="InstitutionOrigine" />
                     </div>
 
                     <div class="champ">
-                        <label asp-for="Identifiant">Identifiant souhaité *</label>
+                        <label asp-for="Identifiant">
+                            Identifiant souhaité *
+                        </label>
                         <input asp-for="Identifiant" autocomplete="username" />
-                        <span asp-validation-for="Identifiant" class="erreurs"></span>
+                        <span asp-validation-for="Identifiant"
+                              class="erreurs"></span>
                     </div>
 
                     <div class="champ">
                         <label asp-for="MotDePasse">Mot de passe *</label>
-                        <input asp-for="MotDePasse" type="password"
+                        <input asp-for="MotDePasse"
+                               type="password"
                                autocomplete="new-password" />
-                        <span asp-validation-for="MotDePasse" class="erreurs"></span>
+                        <span asp-validation-for="MotDePasse"
+                              class="erreurs"></span>
                     </div>
 
                     <div class="champ largeur">
                         <label asp-for="ConfirmationMotDePasse">
                             Confirmer le mot de passe *
                         </label>
-                        <input asp-for="ConfirmationMotDePasse" type="password"
+
+                        <input asp-for="ConfirmationMotDePasse"
+                               type="password"
                                autocomplete="new-password" />
+
                         <span asp-validation-for="ConfirmationMotDePasse"
                               class="erreurs"></span>
                     </div>
 
                     <div class="champ largeur">
-                        <button type="submit">Envoyer ma demande d'inscription</button>
+                        <button type="submit">
+                            Envoyer ma demande d'inscription
+                        </button>
                     </div>
+
                 </div>
             </form>
         }
 
-        <p><a href="/Connexion">Déjà inscrit ? Se connecter</a></p>
+        <p>
+            <a href="/Connexion">Déjà inscrit ? Se connecter</a>
+        </p>
     </main>
 </body>
 </html>
