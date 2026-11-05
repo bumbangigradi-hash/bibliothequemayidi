@@ -37,6 +37,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
@@ -45,6 +46,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
@@ -75,17 +77,23 @@
                     <label for="NumeroReservationSaisie" class="form-label fw-bold">
                         Retrait sur réservation
                     </label>
+
                     <div class="input-group">
                         <input type="text"
                                id="NumeroReservationSaisie"
                                name="NumeroReservationSaisie"
                                class="form-control"
                                placeholder="Saisir le numéro de réservation">
-                        <button type="button" id="btnReservation" class="btn btn-outline-primary">
+
+                        <button type="button"
+                                id="btnReservation"
+                                class="btn btn-outline-primary">
                             Charger
                         </button>
                     </div>
+
                     <div id="messageReservation" class="small mt-2"></div>
+
                     <div class="form-text">
                         Laissez ce champ vide pour enregistrer un prêt direct.
                     </div>
@@ -94,6 +102,7 @@
                 <!-- LECTEUR -->
                 <div class="mb-4">
                     <label class="form-label fw-bold">Lecteur</label>
+
                     <input type="text"
                            id="rechercheLecteur"
                            class="form-control"
@@ -102,19 +111,28 @@
 
                     <div id="resultatsLecteurs" class="list-group mt-2"></div>
 
-                    <input type="hidden" asp-for="CodeLecteur" id="CodeLecteur">
+                    <input type="hidden"
+                           asp-for="CodeLecteur"
+                           id="CodeLecteur">
 
-                    <div id="lecteurSelectionne" class="alert alert-success mt-2 d-none"></div>
+                    <div id="lecteurSelectionne"
+                         class="alert alert-success mt-2 d-none"></div>
                 </div>
 
                 <!-- RECHERCHE OUVRAGE -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Ajouter un ouvrage</label>
+
                     <input type="text"
                            id="rechercheOuvrage"
                            class="form-control"
-                           placeholder="Rechercher par titre ou code de document..."
+                           placeholder="Rechercher par titre, nom d'auteur ou cote..."
                            autocomplete="off">
+
+                    <div class="form-text">
+                        Saisissez au moins deux caractères du titre, du nom ou prénom
+                        de l'auteur, ou de la cote de l'exemplaire.
+                    </div>
 
                     <div id="resultatsOuvrages" class="list-group mt-2"></div>
                 </div>
@@ -133,6 +151,7 @@
                                 <th style="width:8%">Action</th>
                             </tr>
                         </thead>
+
                         <tbody id="corpsLignes">
                             <tr id="ligneVide">
                                 <td colspan="7" class="text-center text-muted py-4">
@@ -145,7 +164,10 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <strong id="nombreLignes">0 ouvrage(s)</strong>
-                    <button type="button" id="viderBordereau" class="btn btn-sm btn-outline-danger">
+
+                    <button type="button"
+                            id="viderBordereau"
+                            class="btn btn-sm btn-outline-danger">
                         Vider le bordereau
                     </button>
                 </div>
@@ -153,13 +175,16 @@
                 <!-- OBSERVATIONS -->
                 <div class="mb-3">
                     <label asp-for="Observations" class="form-label">Observations</label>
+
                     <textarea asp-for="Observations"
                               class="form-control"
                               rows="2"
                               maxlength="1000"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg" id="btnEnregistrer">
+                <button type="submit"
+                        class="btn btn-primary btn-lg"
+                        id="btnEnregistrer">
                     Enregistrer le bordereau de prêt
                 </button>
             </form>
@@ -171,10 +196,13 @@
         <div class="card-header bg-white py-3">
             <h2 class="h5 mb-0">Historique des emprunts</h2>
         </div>
+
         <div class="card-body">
             @if (Model.Emprunts.Count == 0)
             {
-                <div class="alert alert-info mb-0">Aucun emprunt enregistré.</div>
+                <div class="alert alert-info mb-0">
+                    Aucun emprunt enregistré.
+                </div>
             }
             else
             {
@@ -191,6 +219,7 @@
                                 <th>Statut</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             @foreach (var emprunt in Model.Emprunts)
                             {
@@ -198,12 +227,30 @@
                                     && emprunt.DateEcheance < DateOnly.FromDateTime(DateTime.Today);
 
                                 <tr>
-                                    <td>@emprunt.CodeBordereauPretNavigation.NumeroBordereau</td>
-                                    <td>@emprunt.CodeBordereauPretNavigation.CodeLecteurNavigation.NumeroLecteur</td>
-                                    <td>@emprunt.CodeExemplaireNavigation.CodeDocumentNavigation.Titre</td>
-                                    <td>@emprunt.CodeExemplaireNavigation.Cote</td>
-                                    <td>@emprunt.DateRetrait.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@emprunt.DateEcheance.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @emprunt.CodeBordereauPretNavigation.NumeroBordereau
+                                    </td>
+
+                                    <td>
+                                        @emprunt.CodeBordereauPretNavigation.CodeLecteurNavigation.NumeroLecteur
+                                    </td>
+
+                                    <td>
+                                        @emprunt.CodeExemplaireNavigation.CodeDocumentNavigation.Titre
+                                    </td>
+
+                                    <td>
+                                        @emprunt.CodeExemplaireNavigation.Cote
+                                    </td>
+
+                                    <td>
+                                        @emprunt.DateRetrait.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @emprunt.DateEcheance.ToString("dd/MM/yyyy")
+                                    </td>
+
                                     <td>
                                         @if (retard)
                                         {
@@ -219,7 +266,9 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">@emprunt.StatutLigne</span>
+                                            <span class="badge bg-secondary">
+                                                @emprunt.StatutLigne
+                                            </span>
                                         }
                                     </td>
                                 </tr>
@@ -239,6 +288,7 @@
         document.addEventListener("DOMContentLoaded", function () {
 
             const urlBase = window.location.pathname;
+
             const rechercheLecteur = document.getElementById("rechercheLecteur");
             const resultatsLecteurs = document.getElementById("resultatsLecteurs");
             const codeLecteur = document.getElementById("CodeLecteur");
@@ -246,6 +296,7 @@
 
             const rechercheOuvrage = document.getElementById("rechercheOuvrage");
             const resultatsOuvrages = document.getElementById("resultatsOuvrages");
+
             const corpsLignes = document.getElementById("corpsLignes");
             const nombreLignes = document.getElementById("nombreLignes");
 
@@ -261,11 +312,14 @@
                 element.textContent = message;
             }
 
-            // RECHERCHE LECTEURS
+            // =====================================================
+            // RECHERCHE DES LECTEURS
+            // =====================================================
             let timerLecteur;
 
             rechercheLecteur.addEventListener("input", function () {
                 clearTimeout(timerLecteur);
+
                 const q = this.value.trim();
 
                 codeLecteur.value = "";
@@ -281,6 +335,10 @@
                         const response = await fetch(
                             `${urlBase}?handler=RechercherLecteurs&q=${encodeURIComponent(q)}`
                         );
+
+                        if (!response.ok)
+                            throw new Error("Erreur HTTP");
+
                         const data = await response.json();
 
                         resultatsLecteurs.innerHTML = "";
@@ -293,17 +351,23 @@
 
                         data.resultats.forEach(l => {
                             const bouton = document.createElement("button");
+
                             bouton.type = "button";
                             bouton.className = "list-group-item list-group-item-action";
 
-                            const nom = [l.nom, l.postnom, l.prenom].filter(Boolean).join(" ");
+                            const nom = [l.nom, l.postnom, l.prenom]
+                                .filter(Boolean)
+                                .join(" ");
 
                             bouton.textContent =
                                 `${l.numero} — ${nom} — ${l.identifiant || ""}`;
 
                             bouton.addEventListener("click", () => {
                                 codeLecteur.value = l.code;
-                                lecteurSelectionne.textContent = "Lecteur sélectionné : " + bouton.textContent;
+
+                                lecteurSelectionne.textContent =
+                                    "Lecteur sélectionné : " + bouton.textContent;
+
                                 lecteurSelectionne.classList.remove("d-none");
                                 rechercheLecteur.value = bouton.textContent;
                                 resultatsLecteurs.innerHTML = "";
@@ -311,18 +375,22 @@
 
                             resultatsLecteurs.appendChild(bouton);
                         });
-                    } catch {
+                    }
+                    catch {
                         resultatsLecteurs.innerHTML =
                             '<div class="list-group-item text-danger">Erreur de recherche des lecteurs.</div>';
                     }
                 }, 300);
             });
 
-            // RECHERCHE OUVRAGES
+            // =====================================================
+            // RECHERCHE DES OUVRAGES : TITRE, AUTEUR OU COTE
+            // =====================================================
             let timerOuvrage;
 
             rechercheOuvrage.addEventListener("input", function () {
                 clearTimeout(timerOuvrage);
+
                 const q = this.value.trim();
 
                 if (q.length < 2 || reservationActive) {
@@ -335,6 +403,10 @@
                         const response = await fetch(
                             `${urlBase}?handler=RechercherOuvrages&q=${encodeURIComponent(q)}`
                         );
+
+                        if (!response.ok)
+                            throw new Error("Erreur HTTP");
+
                         const data = await response.json();
 
                         resultatsOuvrages.innerHTML = "";
@@ -353,19 +425,31 @@
                             titre.className = "fw-bold";
                             titre.textContent = d.titre;
 
+                            const auteurs = document.createElement("div");
+                            auteurs.className = "small text-primary";
+                            auteurs.textContent =
+                                "Auteur(s) : " +
+                                (d.auteurs && d.auteurs.length > 0
+                                    ? d.auteurs.join(" ; ")
+                                    : "Auteur non renseigné");
+
                             const details = document.createElement("div");
                             details.className = "small text-muted";
                             details.textContent =
                                 `${d.type} — ${d.duree} jour(s) — ${d.nombreDisponible} exemplaire(s) disponible(s)`;
 
                             bloc.appendChild(titre);
+                            bloc.appendChild(auteurs);
                             bloc.appendChild(details);
 
                             if (d.nombreDisponible > 0) {
                                 d.exemplaires.forEach(e => {
                                     const bouton = document.createElement("button");
+
                                     bouton.type = "button";
-                                    bouton.className = "btn btn-sm btn-outline-primary mt-2 me-2";
+                                    bouton.className =
+                                        "btn btn-sm btn-outline-primary mt-2 me-2";
+
                                     bouton.textContent = `Ajouter ${e.cote}`;
 
                                     bouton.addEventListener("click", () => {
@@ -381,23 +465,29 @@
 
                                     bloc.appendChild(bouton);
                                 });
-                            } else {
+                            }
+                            else {
                                 const indisponible = document.createElement("span");
+
                                 indisponible.className = "badge bg-danger mt-2";
                                 indisponible.textContent = "Aucun exemplaire disponible";
+
                                 bloc.appendChild(indisponible);
                             }
 
                             resultatsOuvrages.appendChild(bloc);
                         });
-                    } catch {
+                    }
+                    catch {
                         resultatsOuvrages.innerHTML =
                             '<div class="list-group-item text-danger">Erreur de recherche des ouvrages.</div>';
                     }
                 }, 300);
             });
 
-            // AJOUT D'UNE LIGNE
+            // =====================================================
+            // AJOUT D'UNE LIGNE AU BORDEREAU
+            // =====================================================
             function ajouterLigne(ouvrage) {
                 if (lignes.some(l => l.code === ouvrage.code)) {
                     alert("Cet exemplaire figure déjà dans le bordereau.");
@@ -408,7 +498,9 @@
                 afficherLignes();
             }
 
+            // =====================================================
             // AFFICHAGE DU BORDEREAU
+            // =====================================================
             function afficherLignes() {
                 corpsLignes.innerHTML = "";
 
@@ -419,8 +511,11 @@
 
                 lignes.forEach((ouvrage, index) => {
                     const echeance = new Date();
+
                     echeance.setHours(12, 0, 0, 0);
-                    echeance.setDate(echeance.getDate() + Number(ouvrage.duree));
+                    echeance.setDate(
+                        echeance.getDate() + Number(ouvrage.duree)
+                    );
 
                     const date = echeance.toLocaleDateString("fr-FR");
 
@@ -442,10 +537,12 @@
                     });
 
                     const action = document.createElement("td");
+
                     const supprimer = document.createElement("button");
                     supprimer.type = "button";
                     supprimer.className = "btn btn-sm btn-outline-danger";
                     supprimer.textContent = "Retirer";
+
                     supprimer.addEventListener("click", () => {
                         lignes.splice(index, 1);
                         afficherLignes();
@@ -454,12 +551,17 @@
                     action.appendChild(supprimer);
                     tr.appendChild(action);
 
+                    // Champ envoyé au serveur pour chaque exemplaire.
+                    const celluleCachee = document.createElement("td");
+                    celluleCachee.className = "d-none";
+
                     const hidden = document.createElement("input");
                     hidden.type = "hidden";
                     hidden.name = "CodesExemplaires";
                     hidden.value = ouvrage.code;
-                    tr.appendChild(document.createElement("td")).classList.add("d-none");
-                    tr.lastChild.appendChild(hidden);
+
+                    celluleCachee.appendChild(hidden);
+                    tr.appendChild(celluleCachee);
 
                     corpsLignes.appendChild(tr);
                 });
@@ -467,18 +569,29 @@
                 nombreLignes.textContent = `${lignes.length} ouvrage(s)`;
             }
 
-            document.getElementById("viderBordereau").addEventListener("click", () => {
-                lignes = [];
-                afficherLignes();
-            });
+            document.getElementById("viderBordereau")
+                .addEventListener("click", () => {
+                    if (reservationActive) {
+                        alert("Le bordereau lié à une réservation ne peut pas être vidé ici.");
+                        return;
+                    }
 
+                    lignes = [];
+                    afficherLignes();
+                });
+
+            // =====================================================
             // CHARGEMENT D'UNE RÉSERVATION
+            // =====================================================
             btnReservation.addEventListener("click", async () => {
                 const code = reservationInput.value.trim();
 
                 if (!code) {
-                    afficherMessage(messageReservation,
-                        "Saisissez un numéro de réservation.", "text-danger");
+                    afficherMessage(
+                        messageReservation,
+                        "Saisissez un numéro de réservation.",
+                        "text-danger"
+                    );
                     return;
                 }
 
@@ -486,19 +599,31 @@
                     const response = await fetch(
                         `${urlBase}?handler=ChargerReservation&code=${encodeURIComponent(code)}`
                     );
+
+                    if (!response.ok)
+                        throw new Error("Erreur HTTP");
+
                     const data = await response.json();
 
                     if (!data.succes) {
-                        afficherMessage(messageReservation, data.message, "text-danger");
+                        afficherMessage(
+                            messageReservation,
+                            data.message,
+                            "text-danger"
+                        );
                         return;
                     }
 
                     reservationActive = true;
+
                     codeLecteur.value = data.lecteur.code;
+
                     rechercheLecteur.value =
                         `${data.lecteur.numero} — ${data.lecteur.nom} ${data.lecteur.postnom || ""} ${data.lecteur.prenom || ""}`;
 
-                    lecteurSelectionne.textContent = "Lecteur de la réservation : " + rechercheLecteur.value;
+                    lecteurSelectionne.textContent =
+                        "Lecteur de la réservation : " + rechercheLecteur.value;
+
                     lecteurSelectionne.classList.remove("d-none");
 
                     lignes = [{
@@ -517,28 +642,38 @@
 
                     afficherLignes();
 
-                    afficherMessage(messageReservation,
-                        `Réservation ${data.reservation} chargée avec succès.`, "text-success");
-
-                } catch {
-                    afficherMessage(messageReservation,
-                        "Impossible de charger cette réservation.", "text-danger");
+                    afficherMessage(
+                        messageReservation,
+                        `Réservation ${data.reservation} chargée avec succès.`,
+                        "text-success"
+                    );
+                }
+                catch {
+                    afficherMessage(
+                        messageReservation,
+                        "Impossible de charger cette réservation.",
+                        "text-danger"
+                    );
                 }
             });
 
+            // =====================================================
             // VALIDATION AVANT ENREGISTREMENT
-            document.getElementById("formEmprunt").addEventListener("submit", function (event) {
-                if (!codeLecteur.value) {
-                    event.preventDefault();
-                    alert("Veuillez sélectionner un lecteur.");
-                    return;
-                }
+            // =====================================================
+            document.getElementById("formEmprunt")
+                .addEventListener("submit", function (event) {
 
-                if (lignes.length === 0) {
-                    event.preventDefault();
-                    alert("Ajoutez au moins un ouvrage.");
-                }
-            });
+                    if (!codeLecteur.value) {
+                        event.preventDefault();
+                        alert("Veuillez sélectionner un lecteur.");
+                        return;
+                    }
+
+                    if (lignes.length === 0) {
+                        event.preventDefault();
+                        alert("Ajoutez au moins un ouvrage.");
+                    }
+                });
 
             afficherLignes();
         });

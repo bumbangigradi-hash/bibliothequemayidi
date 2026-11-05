@@ -92,7 +92,7 @@ public class IndexModel : PageModel
     }
 
     // =========================================================
-    // RECHERCHE DYNAMIQUE DES OUVRAGES ET EXEMPLAIRES
+    // RECHERCHE DES OUVRAGES PAR TITRE, AUTEUR OU COTE
     // =========================================================
     public async Task<IActionResult> OnGetRechercherOuvragesAsync(string? q)
     {
@@ -101,31 +101,42 @@ public class IndexModel : PageModel
 
         q = q.Trim();
 
-        int.TryParse(q, out int codeDocument);
+        // Recherche des documents associés à une cote saisie.
+        var codesDocumentsParCote = await _context.Exemplaires
+            .AsNoTracking()
+            .Where(e => e.Cote.Contains(q))
+            .Select(e => e.CodeDocument)
+            .Distinct()
+            .ToListAsync();
 
+        // Recherche par titre, nom/prénom d'auteur ou cote.
         var documents = await _context.Documents
             .AsNoTracking()
             .Include(d => d.CodeTypeDocumentNavigation)
+            .Include(d => d.DocumentsAuteurs)
+                .ThenInclude(da => da.CodeAuteurNavigation)
             .Where(d =>
                 d.EmpruntAutorise &&
                 d.CodeTypeDocumentNavigation.EmpruntAutorise &&
                 (
                     d.Titre.Contains(q) ||
-                    (codeDocument > 0 && d.CodeDocument == codeDocument)
+
+                    d.DocumentsAuteurs.Any(da =>
+                        da.CodeAuteurNavigation.NomAuteur.Contains(q) ||
+                        (da.CodeAuteurNavigation.PrenomAuteur != null &&
+                         da.CodeAuteurNavigation.PrenomAuteur.Contains(q))) ||
+
+                    codesDocumentsParCote.Contains(d.CodeDocument)
                 ))
             .OrderBy(d => d.Titre)
-            .Take(20)
-            .Select(d => new
-            {
-                code = d.CodeDocument,
-                titre = d.Titre,
-                type = d.CodeTypeDocumentNavigation.NomTypeDocument,
-                duree = d.CodeTypeDocumentNavigation.DureePretJours
-            })
+            .Take(30)
             .ToListAsync();
 
-        var codesDocuments = documents.Select(d => d.code).ToList();
+        var codesDocuments = documents
+            .Select(d => d.CodeDocument)
+            .ToList();
 
+        // Seuls les exemplaires disponibles sont proposés au prêt.
         var exemplaires = await _context.Exemplaires
             .AsNoTracking()
             .Where(e =>
@@ -144,7 +155,7 @@ public class IndexModel : PageModel
         var resultats = documents.Select(d =>
         {
             var copies = exemplaires
-                .Where(e => e.codeDocument == d.code)
+                .Where(e => e.codeDocument == d.CodeDocument)
                 .Select(e => new
                 {
                     e.code,
@@ -153,12 +164,23 @@ public class IndexModel : PageModel
                 })
                 .ToList();
 
+            var auteurs = d.DocumentsAuteurs
+                .OrderBy(da => da.OrdreAffichage)
+                .Select(da =>
+                    da.CodeAuteurNavigation.NomAuteur +
+                    (string.IsNullOrWhiteSpace(
+                        da.CodeAuteurNavigation.PrenomAuteur)
+                        ? ""
+                        : ", " + da.CodeAuteurNavigation.PrenomAuteur))
+                .ToList();
+
             return new
             {
-                d.code,
-                d.titre,
-                d.type,
-                d.duree,
+                code = d.CodeDocument,
+                titre = d.Titre,
+                type = d.CodeTypeDocumentNavigation.NomTypeDocument,
+                duree = d.CodeTypeDocumentNavigation.DureePretJours,
+                auteurs,
                 nombreDisponible = copies.Count,
                 exemplaires = copies
             };
@@ -354,9 +376,7 @@ public class IndexModel : PageModel
             Lecteur? lecteur = null;
             List<int> codesAEmprunter;
 
-            // -------------------------------------------------
-            // CAS 1 : RETRAIT SUR RESERVATION
-            // -------------------------------------------------
+            // RETRAIT SUR RESERVATION
             if (!string.IsNullOrWhiteSpace(NumeroReservationSaisie))
             {
                 var code = NumeroReservationSaisie.Trim();
@@ -401,9 +421,7 @@ public class IndexModel : PageModel
 
                 CodeLecteur = lecteur.CodeLecteur;
             }
-            // -------------------------------------------------
-            // CAS 2 : PRET DIRECT MULTI-LIGNES
-            // -------------------------------------------------
+            // PRET DIRECT MULTI-LIGNES
             else
             {
                 if (CodesExemplaires == null ||
@@ -423,9 +441,7 @@ public class IndexModel : PageModel
                 codesAEmprunter = CodesExemplaires.Distinct().ToList();
             }
 
-            // -------------------------------------------------
             // VERIFICATION DU LECTEUR
-            // -------------------------------------------------
             if (lecteur == null ||
                 lecteur.StatutLecteur != "ACTIF" ||
                 !lecteur.CodeCompteNavigation.Actif ||
@@ -444,9 +460,7 @@ public class IndexModel : PageModel
                     transaction, "L'inscription du lecteur a expiré.");
             }
 
-            // -------------------------------------------------
             // RECUPERATION DES EXEMPLAIRES
-            // -------------------------------------------------
             var exemplaires = await _context.Exemplaires
                 .Include(e => e.CodeDocumentNavigation)
                     .ThenInclude(d => d.CodeTypeDocumentNavigation)
@@ -490,9 +504,7 @@ public class IndexModel : PageModel
                 }
             }
 
-            // -------------------------------------------------
             // VERIFICATION DE LA RESERVATION
-            // -------------------------------------------------
             if (reservation != null)
             {
                 var dejaRetiree = await _context.LignesPrets
@@ -506,9 +518,7 @@ public class IndexModel : PageModel
                 }
             }
 
-            // -------------------------------------------------
             // CREATION DU BORDEREAU
-            // -------------------------------------------------
             var bordereau = new BordereauxPret
             {
                 NumeroBordereau = $"PRET-{maintenant:yyyyMMddHHmmssfff}",
@@ -524,9 +534,7 @@ public class IndexModel : PageModel
             _context.BordereauxPrets.Add(bordereau);
             await _context.SaveChangesAsync();
 
-            // -------------------------------------------------
             // CREATION DES LIGNES DE PRET
-            // -------------------------------------------------
             foreach (var exemplaire in exemplaires)
             {
                 var duree = exemplaire.CodeDocumentNavigation
