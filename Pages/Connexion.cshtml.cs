@@ -117,7 +117,7 @@ public class ConnexionModel : PageModel
             "ADMINISTRATEUR" => RedirectToPage("/Admin/Index"),
             "BIBLIOTHECAIRE" => RedirectToPage("/Bibliothecaire/Index"),
             "GESTIONNAIRE" => RedirectToPage("/Gestionnaire/Index"),
-            "LECTEUR" => RedirectToPage("/Lecteur/Index"),
+            "LECTEUR" => RedirectToPage("/EspaceLecteur/Index"),
             "RESPONSABLE" => RedirectToPage("/Responsable/Index"),
             "VICE_RESPONSABLE" => RedirectToPage("/ViceResponsable/Index"),
             _ => RedirectToPage("/Index")
