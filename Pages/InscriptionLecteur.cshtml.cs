@@ -148,6 +148,11 @@ public class InscriptionLecteurModel : PageModel
 
         try
         {
+            // Date compatible avec PostgreSQL timestamp without time zone.
+            DateTime maintenant = DateTime.SpecifyKind(
+                DateTime.Now,
+                DateTimeKind.Unspecified);
+
             var compte = new ComptesUtilisateur
             {
                 CodeRole = "LECTEUR",
@@ -158,9 +163,7 @@ public class InscriptionLecteurModel : PageModel
                 MotDePasseHash = "",
                 StatutCompte = "EN_ATTENTE",
                 Actif = false,
-                DateCreation = DateTime.SpecifyKind(
-                    DateTime.Now,
-                    DateTimeKind.Unspecified),
+                DateCreation = maintenant,
                 NombreEchecsConnexion = 0
             };
 
@@ -174,17 +177,11 @@ public class InscriptionLecteurModel : PageModel
             var lecteur = new Lecteur
             {
                 CodeCompte = compte.CodeCompte,
-
                 NumeroLecteur = await GenererNumeroLecteurAsync(),
-
                 MatriculeSeminaire = MatriculeSeminaire,
-
                 CategorieLecteur = CategorieLecteur,
-
                 InstitutionOrigine = InstitutionOrigine,
-
-                DateInscription = DateOnly.FromDateTime(DateTime.Today),
-
+                DateInscription = DateOnly.FromDateTime(maintenant),
                 StatutLecteur = "EN_ATTENTE"
             };
 
@@ -218,7 +215,8 @@ public class InscriptionLecteurModel : PageModel
 
             _logger.LogError(
                 ex,
-                "Erreur PostgreSQL lors de l'inscription du lecteur. Détail : {Detail}",
+                "Erreur PostgreSQL lors de l'inscription du lecteur. " +
+                "Détail : {Detail}",
                 ex.InnerException?.Message ?? ex.Message);
 
             ModelState.AddModelError(
@@ -256,7 +254,8 @@ public class InscriptionLecteurModel : PageModel
         for (int tentative = 0; tentative < 20; tentative++)
         {
             string numero =
-                $"MAY-{DateTime.UtcNow:yyyyMMdd}-{RandomNumberGenerator.GetInt32(0, 1_000_000):D6}";
+                $"MAY-{DateTime.Now:yyyyMMdd}-" +
+                $"{RandomNumberGenerator.GetInt32(0, 1_000_000):D6}";
 
             bool existe = await _context.Lecteurs
                 .AnyAsync(l => l.NumeroLecteur == numero);
