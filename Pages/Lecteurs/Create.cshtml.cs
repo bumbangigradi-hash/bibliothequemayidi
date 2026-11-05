@@ -1,6 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Security.Claims;
+using System.Text;
 using bibliotheque_mayidi.Data.Generated;
 using bibliotheque_mayidi.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +17,9 @@ namespace bibliotheque_mayidi.Pages.Lecteurs;
 public class CreateModel : PageModel
 {
     private readonly BibliothequeScaffoldContext _context;
-    private readonly PasswordHasher<ComptesUtilisateur> _passwordHasher = new();
+
+    private readonly PasswordHasher<ComptesUtilisateur>
+        _passwordHasher = new();
 
     public CreateModel(BibliothequeScaffoldContext context)
     {
@@ -37,7 +41,6 @@ public class CreateModel : PageModel
         [StringLength(150)]
         public string? Prenom { get; set; }
 
-        [Required(ErrorMessage = "L'identifiant est obligatoire.")]
         [StringLength(100)]
         public string Identifiant { get; set; } = string.Empty;
 
@@ -71,6 +74,82 @@ public class CreateModel : PageModel
         public string? Observations { get; set; }
     }
 
+    // Nettoyage des noms pour créer un identifiant valide.
+    private static string NettoyerIdentifiant(string valeur)
+    {
+        string normalise = valeur.Normalize(NormalizationForm.FormD);
+
+        var resultat = new StringBuilder();
+
+        foreach (char caractere in normalise)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(caractere)
+                == UnicodeCategory.NonSpacingMark)
+            {
+                continue;
+            }
+
+            if (char.IsLetterOrDigit(caractere))
+            {
+                resultat.Append(char.ToLowerInvariant(caractere));
+            }
+            else if (resultat.Length > 0 &&
+                     resultat[resultat.Length - 1] != '.')
+            {
+                resultat.Append('.');
+            }
+        }
+
+        return resultat.ToString().Trim('.');
+    }
+
+    // Génération d'un identifiant unique.
+    private async Task<string> GenererIdentifiantUniqueAsync()
+    {
+        string prenom = NettoyerIdentifiant(Input.Prenom ?? "");
+        string nom = NettoyerIdentifiant(Input.NomUtilisateur);
+        string postnom = NettoyerIdentifiant(Input.Postnom ?? "");
+
+        string baseIdentifiant = string.Join(
+            ".",
+            new[] { prenom, nom, postnom }
+                .Where(p => !string.IsNullOrWhiteSpace(p))
+        );
+
+        if (string.IsNullOrWhiteSpace(baseIdentifiant))
+        {
+            throw new InvalidOperationException(
+                "Impossible de générer l'identifiant. Vérifiez le nom du lecteur."
+            );
+        }
+
+        // Limitation à 100 caractères.
+        baseIdentifiant = baseIdentifiant.Length > 96
+            ? baseIdentifiant[..96]
+            : baseIdentifiant;
+
+        string identifiant = baseIdentifiant;
+        int numero = 2;
+
+        while (await _context.ComptesUtilisateurs
+            .AnyAsync(c => c.Identifiant == identifiant))
+        {
+            string suffixe = numero.ToString();
+
+            int longueur = Math.Min(
+                baseIdentifiant.Length,
+                100 - suffixe.Length
+            );
+
+            identifiant =
+                baseIdentifiant[..longueur] + suffixe;
+
+            numero++;
+        }
+
+        return identifiant;
+    }
+
     public async Task<IActionResult> OnGetAsync()
     {
         bool roleExiste = await _context.Roles
@@ -80,6 +159,7 @@ public class CreateModel : PageModel
         {
             TempData["Erreur"] =
                 "Le rôle LECTEUR n'existe pas dans la table ROLES.";
+
             return RedirectToPage("./Index");
         }
 
@@ -88,19 +168,43 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        Input.NomUtilisateur = Input.NomUtilisateur.Trim();
-        Input.Identifiant = Input.Identifiant.Trim();
-        Input.NumeroLecteur = Input.NumeroLecteur.Trim();
-        Input.CategorieLecteur = Input.CategorieLecteur.Trim();
+        // Nettoyage des données.
+        Input.NomUtilisateur = Input.NomUtilisateur?.Trim() ?? "";
+        Input.Postnom = Input.Postnom?.Trim();
+        Input.Prenom = Input.Prenom?.Trim();
+        Input.NumeroLecteur = Input.NumeroLecteur?.Trim() ?? "";
+        Input.CategorieLecteur = Input.CategorieLecteur?.Trim() ?? "";
+        Input.Telephone = Input.Telephone?.Trim();
+        Input.EmailExterne = Input.EmailExterne?.Trim();
+        Input.MatriculeSeminaire = Input.MatriculeSeminaire?.Trim();
+        Input.InstitutionOrigine = Input.InstitutionOrigine?.Trim();
+        Input.Observations = Input.Observations?.Trim();
 
+        // L'identifiant envoyé par le navigateur n'est pas fiable.
+        ModelState.Remove("Input.Identifiant");
+
+        // Génération définitive côté serveur.
+        try
+        {
+            Input.Identifiant = await GenererIdentifiantUniqueAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+        }
+
+        // Vérification de la date.
         if (Input.DateExpiration.HasValue &&
-            Input.DateExpiration.Value < DateOnly.FromDateTime(DateTime.Today))
+            Input.DateExpiration.Value <
+            DateOnly.FromDateTime(DateTime.Today))
         {
             ModelState.AddModelError(
                 "Input.DateExpiration",
-                "La date d'expiration ne peut pas être dans le passé.");
+                "La date d'expiration ne peut pas être dans le passé."
+            );
         }
 
+        // Vérification des catégories.
         string[] categories =
         {
             "SEMINARISTE",
@@ -114,31 +218,48 @@ public class CreateModel : PageModel
         {
             ModelState.AddModelError(
                 "Input.CategorieLecteur",
-                "La catégorie sélectionnée est invalide.");
+                "La catégorie sélectionnée est invalide."
+            );
         }
 
-        if (!ModelState.IsValid)
-            return Page();
-
-        string identifiant = Input.Identifiant;
-        string numeroLecteur = Input.NumeroLecteur;
-
-        if (await _context.ComptesUtilisateurs
-            .AnyAsync(c => c.Identifiant == identifiant))
+        // Vérification du numéro de lecteur.
+        if (!string.IsNullOrWhiteSpace(Input.NumeroLecteur))
         {
-            ModelState.AddModelError(
-                "Input.Identifiant",
-                "Cet identifiant existe déjà.");
+            bool numeroExiste = await _context.Lecteurs
+                .AnyAsync(l =>
+                    l.NumeroLecteur == Input.NumeroLecteur);
+
+            if (numeroExiste)
+            {
+                ModelState.AddModelError(
+                    "Input.NumeroLecteur",
+                    "Ce numéro de lecteur existe déjà."
+                );
+            }
         }
 
-        if (await _context.Lecteurs
-            .AnyAsync(l => l.NumeroLecteur == numeroLecteur))
+        // Le matricule est facultatif.
+        // On vérifie son unicité uniquement lorsqu'il est renseigné.
+        if (!string.IsNullOrWhiteSpace(Input.MatriculeSeminaire))
         {
-            ModelState.AddModelError(
-                "Input.NumeroLecteur",
-                "Ce numéro de lecteur existe déjà.");
+            bool matriculeExiste = await _context.Lecteurs
+                .AnyAsync(l =>
+                    l.MatriculeSeminaire == Input.MatriculeSeminaire);
+
+            if (matriculeExiste)
+            {
+                ModelState.AddModelError(
+                    "Input.MatriculeSeminaire",
+                    "Ce matricule est déjà utilisé par un autre lecteur."
+                );
+            }
+        }
+        else
+        {
+            Input.MatriculeSeminaire = null;
         }
 
+        // Vérification du rôle.
         bool roleExiste = await _context.Roles
             .AnyAsync(r => r.CodeRole == "LECTEUR");
 
@@ -146,20 +267,25 @@ public class CreateModel : PageModel
         {
             ModelState.AddModelError(
                 string.Empty,
-                "Le rôle LECTEUR est absent de la base de données.");
+                "Le rôle LECTEUR est absent de la base de données."
+            );
         }
 
         if (!ModelState.IsValid)
             return Page();
 
+        // Identification du bibliothécaire connecté.
         string? claimId = User.FindFirstValue(
-            ClaimTypes.NameIdentifier);
+            ClaimTypes.NameIdentifier
+        );
 
         if (!int.TryParse(claimId, out int codeValidateur))
         {
             ModelState.AddModelError(
                 string.Empty,
-                "Impossible d'identifier le compte du bibliothécaire connecté.");
+                "Impossible d'identifier le compte du bibliothécaire connecté."
+            );
+
             return Page();
         }
 
@@ -173,9 +299,15 @@ public class CreateModel : PageModel
         {
             ModelState.AddModelError(
                 string.Empty,
-                "Le compte validateur est introuvable ou inactif.");
+                "Le compte validateur est introuvable ou inactif."
+            );
+
             return Page();
         }
+
+        // Vérification finale du rôle avant la transaction.
+        string identifiant = Input.Identifiant;
+        string numeroLecteur = Input.NumeroLecteur;
 
         await using var transaction =
             await _context.Database.BeginTransactionAsync();
@@ -184,57 +316,80 @@ public class CreateModel : PageModel
         {
             DateTime maintenant = DateTime.Now;
 
+            // 1. Création du compte utilisateur.
             var compte = new ComptesUtilisateur
             {
                 CodeRole = "LECTEUR",
+
                 NomUtilisateur = Input.NomUtilisateur,
-                Postnom = Input.Postnom?.Trim(),
-                Prenom = Input.Prenom?.Trim(),
+                Postnom = Input.Postnom,
+                Prenom = Input.Prenom,
+
                 Identifiant = identifiant,
-                Telephone = Input.Telephone?.Trim(),
-                EmailExterne = Input.EmailExterne?.Trim(),
+
+                Telephone = Input.Telephone,
+                EmailExterne = Input.EmailExterne,
+
                 StatutCompte = "ACTIF",
                 Actif = true,
+
                 DateCreation = maintenant,
                 DateValidation = maintenant,
+
                 ValidePar = validateur.CodeCompte,
+
                 NombreEchecsConnexion = 0
             };
 
+            // Hachage sécurisé du mot de passe.
             compte.MotDePasseHash =
                 _passwordHasher.HashPassword(
                     compte,
-                    Input.MotDePasse);
+                    Input.MotDePasse
+                );
 
             _context.ComptesUtilisateurs.Add(compte);
+
             await _context.SaveChangesAsync();
 
+            // 2. Création du dossier de lecteur.
             var lecteur = new Lecteur
             {
                 CodeCompte = compte.CodeCompte,
+
                 NumeroLecteur = numeroLecteur,
+
                 MatriculeSeminaire =
-                    string.IsNullOrWhiteSpace(Input.MatriculeSeminaire)
-                        ? null
-                        : Input.MatriculeSeminaire.Trim(),
-                CategorieLecteur = Input.CategorieLecteur,
+                    Input.MatriculeSeminaire,
+
+                CategorieLecteur =
+                    Input.CategorieLecteur,
+
                 InstitutionOrigine =
-                    string.IsNullOrWhiteSpace(Input.InstitutionOrigine)
-                        ? null
-                        : Input.InstitutionOrigine.Trim(),
-                DateInscription = DateOnly.FromDateTime(DateTime.Today),
-                DateExpiration = Input.DateExpiration,
+                    Input.InstitutionOrigine,
+
+                DateInscription =
+                    DateOnly.FromDateTime(DateTime.Today),
+
+                DateExpiration =
+                    Input.DateExpiration,
+
                 StatutLecteur = "ACTIF",
-                Observations = Input.Observations?.Trim()
+
+                Observations = Input.Observations
             };
 
             _context.Lecteurs.Add(lecteur);
+
             await _context.SaveChangesAsync();
 
+            // 3. Validation définitive de la transaction.
             await transaction.CommitAsync();
 
             TempData["Succes"] =
-                $"Le lecteur {lecteur.NumeroLecteur} a été créé avec succès.";
+                $"Le lecteur {Input.NomUtilisateur} " +
+                $"a été créé avec succès. " +
+                $"Identifiant : {identifiant}";
 
             return RedirectToPage("./Index");
         }
@@ -244,13 +399,21 @@ public class CreateModel : PageModel
 
             ModelState.AddModelError(
                 string.Empty,
-                "Enregistrement impossible. Vérifiez les contraintes de la base de données et l'unicité des informations.");
+                "L'enregistrement a échoué. Une information existe peut-être déjà dans la base de données. Vérifiez le numéro de lecteur, le matricule et l'identifiant."
+            );
+
             return Page();
         }
-        catch
+        catch (Exception)
         {
             await transaction.RollbackAsync();
-            throw;
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Une erreur inattendue est survenue pendant la création du lecteur. Aucune création partielle n'a été conservée."
+            );
+
+            return Page();
         }
     }
 }

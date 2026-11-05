@@ -6,6 +6,7 @@
 }
 
 <div class="container py-4">
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h2">Ajouter un lecteur</h1>
@@ -13,12 +14,14 @@
                 Créer un compte utilisateur et son dossier de lecteur.
             </p>
         </div>
+
         <a asp-page="./Index" class="btn btn-outline-secondary">
             Retour à la liste
         </a>
     </div>
 
     <form method="post">
+
         <div asp-validation-summary="ModelOnly"
              class="alert alert-danger"
              role="alert"></div>
@@ -30,11 +33,14 @@
 
             <div class="card-body">
                 <div class="row g-3">
+
                     <div class="col-md-4">
                         <label asp-for="Input.NomUtilisateur"
                                class="form-label">Nom *</label>
+
                         <input asp-for="Input.NomUtilisateur"
                                class="form-control" />
+
                         <span asp-validation-for="Input.NomUtilisateur"
                               class="text-danger"></span>
                     </div>
@@ -42,6 +48,7 @@
                     <div class="col-md-4">
                         <label asp-for="Input.Postnom"
                                class="form-label">Postnom</label>
+
                         <input asp-for="Input.Postnom"
                                class="form-control" />
                     </div>
@@ -49,6 +56,7 @@
                     <div class="col-md-4">
                         <label asp-for="Input.Prenom"
                                class="form-label">Prénom</label>
+
                         <input asp-for="Input.Prenom"
                                class="form-control" />
                     </div>
@@ -56,6 +64,7 @@
                     <div class="col-md-6">
                         <label asp-for="Input.Telephone"
                                class="form-label">Téléphone</label>
+
                         <input asp-for="Input.Telephone"
                                class="form-control" />
                     </div>
@@ -63,12 +72,15 @@
                     <div class="col-md-6">
                         <label asp-for="Input.EmailExterne"
                                class="form-label">Adresse e-mail</label>
+
                         <input asp-for="Input.EmailExterne"
                                type="email"
                                class="form-control" />
+
                         <span asp-validation-for="Input.EmailExterne"
                               class="text-danger"></span>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -80,12 +92,15 @@
 
             <div class="card-body">
                 <div class="row g-3">
+
                     <div class="col-md-4">
                         <label asp-for="Input.NumeroLecteur"
                                class="form-label">Numéro de lecteur *</label>
+
                         <input asp-for="Input.NumeroLecteur"
                                class="form-control"
                                placeholder="Ex. LEC-2026-001" />
+
                         <span asp-validation-for="Input.NumeroLecteur"
                               class="text-danger"></span>
                     </div>
@@ -93,6 +108,7 @@
                     <div class="col-md-4">
                         <label asp-for="Input.CategorieLecteur"
                                class="form-label">Catégorie *</label>
+
                         <select asp-for="Input.CategorieLecteur"
                                 class="form-select">
                             <option value="SEMINARISTE">Séminariste</option>
@@ -101,20 +117,30 @@
                             <option value="PERSONNEL">Personnel</option>
                             <option value="AUTRE">Autre</option>
                         </select>
+
                         <span asp-validation-for="Input.CategorieLecteur"
                               class="text-danger"></span>
                     </div>
 
                     <div class="col-md-4">
                         <label asp-for="Input.MatriculeSeminaire"
-                               class="form-label">Matricule du séminaire</label>
+                               class="form-label">
+                            Matricule du séminaire (facultatif)
+                        </label>
+
                         <input asp-for="Input.MatriculeSeminaire"
                                class="form-control" />
+
+                        <span asp-validation-for="Input.MatriculeSeminaire"
+                              class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="Input.InstitutionOrigine"
-                               class="form-label">Institution d'origine</label>
+                               class="form-label">
+                            Institution d'origine
+                        </label>
+
                         <input asp-for="Input.InstitutionOrigine"
                                class="form-control" />
                     </div>
@@ -122,9 +148,11 @@
                     <div class="col-md-6">
                         <label asp-for="Input.DateExpiration"
                                class="form-label">Date d'expiration</label>
+
                         <input asp-for="Input.DateExpiration"
                                type="date"
                                class="form-control" />
+
                         <span asp-validation-for="Input.DateExpiration"
                               class="text-danger"></span>
                     </div>
@@ -132,10 +160,12 @@
                     <div class="col-12">
                         <label asp-for="Input.Observations"
                                class="form-label">Observations</label>
+
                         <textarea asp-for="Input.Observations"
                                   class="form-control"
                                   rows="3"></textarea>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -146,50 +176,112 @@
             </div>
 
             <div class="card-body">
+
                 <div class="row g-3">
+
                     <div class="col-md-6">
                         <label asp-for="Input.Identifiant"
-                               class="form-label">Identifiant *</label>
+                               class="form-label">
+                            Identifiant automatique
+                        </label>
+
                         <input asp-for="Input.Identifiant"
                                class="form-control"
-                               autocomplete="username" />
-                        <span asp-validation-for="Input.Identifiant"
-                              class="text-danger"></span>
+                               readonly
+                               autocomplete="username"
+                               placeholder="Génération automatique" />
+
+                        <div class="form-text">
+                            Généré à partir du prénom, du nom et du postnom.
+                        </div>
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="Input.MotDePasse"
-                               class="form-label">Mot de passe provisoire *</label>
+                               class="form-label">
+                            Mot de passe provisoire *
+                        </label>
+
                         <input asp-for="Input.MotDePasse"
                                type="password"
                                class="form-control"
                                autocomplete="new-password" />
+
                         <div class="form-text">
                             8 caractères minimum.
                         </div>
+
                         <span asp-validation-for="Input.MotDePasse"
                               class="text-danger"></span>
                     </div>
+
                 </div>
 
                 <div class="alert alert-info mt-3 mb-0">
-                    Le compte sera créé comme actif. Transmets les identifiants
-                    au lecteur de manière sécurisée.
+                    L'identifiant est généré automatiquement.
+                    Le compte sera activé dès sa création.
+                    Le matricule du séminaire n'est pas obligatoire.
                 </div>
+
             </div>
         </div>
 
         <div class="d-flex gap-2">
+
             <button type="submit" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i>
                 Enregistrer le lecteur
             </button>
-            <a asp-page="./Index" class="btn btn-outline-secondary">
+
+            <a asp-page="./Index"
+               class="btn btn-outline-secondary">
                 Annuler
             </a>
+
         </div>
+
     </form>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const nom = document.getElementById("Input_NomUtilisateur");
+            const postnom = document.getElementById("Input_Postnom");
+            const prenom = document.getElementById("Input_Prenom");
+            const identifiant = document.getElementById("Input_Identifiant");
+
+            function nettoyer(texte) {
+                return texte
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9]+/g, ".");
+            }
+
+            function genererIdentifiant() {
+
+                const parties = [
+                    prenom.value,
+                    nom.value,
+                    postnom.value
+                ]
+                    .map(nettoyer)
+                    .filter(x => x.length > 0);
+
+                identifiant.value = parties.join(".");
+            }
+
+            nom.addEventListener("input", genererIdentifiant);
+            postnom.addEventListener("input", genererIdentifiant);
+            prenom.addEventListener("input", genererIdentifiant);
+
+            genererIdentifiant();
+        });
+    </script>
 }
