@@ -1,78 +1,973 @@
 ﻿@page
 @model IndexModel
+
 @{
-    ViewData["Title"] = "Tableau de bord";
+    ViewData["Title"] = "Accueil";
+    Layout = null;
 }
 
-<div class="container py-5">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <div class="mb-5">
-        <h1 class="display-5 fw-bold">Bibliothèque du Grand Séminaire</h1>
-        <h2 class="h4 text-secondary">Saint Robert Bellarmin de Mayidi</h2>
-        <p class="text-muted mt-3">
-            Bienvenue dans le système de gestion de la bibliothèque.
-        </p>
-    </div>
+    <title>Bibliothèque du Grand Séminaire de Mayidi</title>
 
-    <div class="row g-4">
+    <meta name="description"
+          content="Bibliothèque du Grand Séminaire de Mayidi, Saint Robert Bellarmin. Catalogue documentaire et ressources intellectuelles." />
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body p-4">
-                    <div class="fs-1 mb-3">📚</div>
-                    <h3 class="h5">Gestion des emprunts</h3>
-                    <p class="text-muted">
-                        Enregistrer les prêts de livres et consulter les emprunts.
-                    </p>
-                    <a asp-page="/Emprunts/Index"
-                       class="btn btn-outline-primary">
-                        Accéder aux emprunts
-                    </a>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet" />
+
+    <style>
+            :root {
+                --bleu-fonce: #102f59;
+                --bleu-principal: #175da8;
+                --bleu-moyen: #2878c7;
+                --bleu-clair: #eaf3fc;
+                --bleu-tres-clair: #f5f9fe;
+                --blanc: #ffffff;
+                --texte: #26364a;
+                --texte-secondaire: #718096;
+                --bordure: #e2eaf3;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                background: var(--blanc);
+                color: var(--texte);
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            /* NAVIGATION */
+
+            .main-navbar {
+                background: var(--bleu-fonce);
+                padding: 15px 0;
+                box-shadow: 0 3px 15px rgba(0,0,0,.12);
+            }
+
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                color: white;
+            }
+
+                .brand:hover {
+                    color: white;
+                }
+
+            .brand-logo {
+                width: 48px;
+                height: 48px;
+                background: white;
+                color: var(--bleu-fonce);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 10px;
+                font-size: 26px;
+            }
+
+            .brand-title {
+                font-size: 15px;
+                font-weight: 800;
+                letter-spacing: .3px;
+            }
+
+            .brand-subtitle {
+                display: block;
+                font-size: 11px;
+                color: #c6d9ef;
+                font-weight: 400;
+                margin-top: 3px;
+            }
+
+            .main-navbar .nav-link {
+                color: #e1eaf5;
+                font-size: 13px;
+                font-weight: 600;
+                padding: 10px 13px;
+            }
+
+                .main-navbar .nav-link:hover {
+                    color: white;
+                }
+
+            .btn-connexion {
+                background: white;
+                color: var(--bleu-fonce);
+                border: 1px solid white;
+                border-radius: 7px;
+                padding: 11px 20px;
+                font-size: 13px;
+                font-weight: 800;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                transition: .2s;
+            }
+
+                .btn-connexion:hover {
+                    background: #dceafa;
+                    color: var(--bleu-fonce);
+                }
+
+            .navbar-toggler {
+                border-color: rgba(255,255,255,.5);
+            }
+
+            .navbar-toggler-icon {
+                filter: brightness(0) invert(1);
+            }
+
+            /* BANNIERE PRINCIPALE */
+
+            .hero {
+                background: radial-gradient(circle at 90% 20%, rgba(79,153,226,.25), transparent 30%), linear-gradient(120deg, #102f59 0%, #175da8 100%);
+                color: white;
+                padding: 95px 0 100px;
+                overflow: hidden;
+            }
+
+            .hero-label {
+                display: inline-block;
+                background: rgba(255,255,255,.13);
+                border: 1px solid rgba(255,255,255,.2);
+                color: #d9eaff;
+                padding: 9px 15px;
+                border-radius: 30px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                margin-bottom: 25px;
+            }
+
+            .hero h1 {
+                font-size: clamp(34px, 5vw, 55px);
+                font-weight: 800;
+                line-height: 1.17;
+                letter-spacing: -1.5px;
+                margin-bottom: 23px;
+            }
+
+            .hero-description {
+                color: #dce9f8;
+                font-size: 15px;
+                line-height: 1.9;
+                max-width: 650px;
+            }
+
+            .hero-illustration {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 300px;
+            }
+
+                .hero-illustration i {
+                    font-size: 190px;
+                    color: rgba(255,255,255,.88);
+                    filter: drop-shadow(0 15px 25px rgba(0,0,0,.2));
+                }
+
+            /* RECHERCHE */
+
+            .search-container {
+                background: white;
+                padding: 8px;
+                border-radius: 10px;
+                max-width: 660px;
+                display: flex;
+                box-shadow: 0 10px 30px rgba(0,0,0,.15);
+                margin-top: 30px;
+            }
+
+                .search-container input {
+                    border: none;
+                    outline: none;
+                    box-shadow: none;
+                    padding: 13px;
+                    font-size: 13px;
+                }
+
+                    .search-container input:focus {
+                        box-shadow: none;
+                    }
+
+            .btn-search {
+                background: var(--bleu-principal);
+                color: white;
+                border: none;
+                border-radius: 7px;
+                padding: 12px 20px;
+                font-weight: 700;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+                .btn-search:hover {
+                    background: var(--bleu-fonce);
+                    color: white;
+                }
+
+            .btn-explorer {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                color: white;
+                border: 1px solid rgba(255,255,255,.6);
+                padding: 13px 21px;
+                border-radius: 7px;
+                margin-top: 22px;
+                font-weight: 700;
+                font-size: 13px;
+                transition: .2s;
+            }
+
+                .btn-explorer:hover {
+                    background: white;
+                    color: var(--bleu-fonce);
+                }
+
+            /* PRESENTATION */
+
+            .section-padding {
+                padding: 75px 0;
+            }
+
+            .section-heading {
+                text-align: center;
+                margin-bottom: 45px;
+            }
+
+                .section-heading span {
+                    color: var(--bleu-principal);
+                    font-weight: 800;
+                    font-size: 11px;
+                    letter-spacing: 2px;
+                    text-transform: uppercase;
+                }
+
+                .section-heading h2 {
+                    color: var(--bleu-fonce);
+                    font-size: 30px;
+                    font-weight: 800;
+                    margin-top: 12px;
+                }
+
+                .section-heading p {
+                    color: var(--texte-secondaire);
+                    font-size: 14px;
+                    margin-top: 12px;
+                }
+
+            /* CARTES */
+
+            .feature-card {
+                height: 100%;
+                background: white;
+                border: 1px solid var(--bordure);
+                border-radius: 12px;
+                padding: 30px;
+                transition: .25s;
+            }
+
+                .feature-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 12px 30px rgba(16,47,89,.09);
+                    border-color: #c5dcf4;
+                }
+
+            .feature-icon {
+                width: 58px;
+                height: 58px;
+                background: var(--bleu-clair);
+                color: var(--bleu-principal);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 27px;
+            }
+
+            .feature-card h3 {
+                font-size: 17px;
+                font-weight: 800;
+                color: var(--bleu-fonce);
+                margin-top: 23px;
+                margin-bottom: 13px;
+            }
+
+            .feature-card p {
+                color: var(--texte-secondaire);
+                font-size: 13px;
+                line-height: 1.8;
+                min-height: 72px;
+            }
+
+            .feature-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--bleu-principal);
+                font-size: 13px;
+                font-weight: 800;
+                margin-top: 10px;
+            }
+
+                .feature-link:hover {
+                    color: var(--bleu-fonce);
+                }
+
+            /* DOMAINES */
+
+            .domains-section {
+                background: var(--bleu-tres-clair);
+            }
+
+            .domain-card {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                background: white;
+                border: 1px solid var(--bordure);
+                border-radius: 10px;
+                padding: 20px;
+                height: 100%;
+                transition: .2s;
+            }
+
+                .domain-card:hover {
+                    border-color: var(--bleu-moyen);
+                    transform: translateY(-3px);
+                }
+
+            .domain-icon {
+                width: 45px;
+                height: 45px;
+                flex-shrink: 0;
+                background: var(--bleu-clair);
+                color: var(--bleu-principal);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 9px;
+                font-size: 21px;
+            }
+
+            .domain-card h4 {
+                font-size: 13px;
+                font-weight: 800;
+                color: var(--bleu-fonce);
+                margin: 0;
+            }
+
+            /* APPEL A L'ACTION */
+
+            .cta {
+                background: linear-gradient(110deg, #102f59, #2169b2);
+                border-radius: 14px;
+                padding: 50px 30px;
+                color: white;
+                text-align: center;
+            }
+
+                .cta h2 {
+                    font-weight: 800;
+                    font-size: 27px;
+                }
+
+                .cta p {
+                    color: #dce9f8;
+                    font-size: 14px;
+                }
+
+                .cta .btn {
+                    background: white;
+                    color: var(--bleu-fonce);
+                    border: none;
+                    font-weight: 800;
+                    padding: 13px 24px;
+                    margin-top: 12px;
+                }
+
+                    .cta .btn:hover {
+                        background: #dceafa;
+                    }
+
+            /* FOOTER */
+
+            footer {
+                background: #0b2342;
+                color: #d2deed;
+                padding: 45px 0 20px;
+            }
+
+            .footer-title {
+                color: white;
+                font-size: 15px;
+                font-weight: 800;
+            }
+
+            .footer-text {
+                font-size: 12px;
+                line-height: 1.9;
+                color: #b6c7dc;
+            }
+
+            .footer-link {
+                display: block;
+                color: #b6c7dc;
+                font-size: 12px;
+                margin-top: 12px;
+            }
+
+                .footer-link:hover {
+                    color: white;
+                }
+
+            .footer-bottom {
+                border-top: 1px solid rgba(255,255,255,.12);
+                margin-top: 35px;
+                padding-top: 20px;
+                text-align: center;
+                font-size: 11px;
+                color: #a7bad1;
+            }
+
+            /* RESPONSIVE */
+
+            @@media (max-width: 991px) {
+                .main-navbar .navbar-collapse {
+                    padding-top: 20px;
+                }
+
+                .main-navbar .nav-link {
+                    padding: 12px 0;
+                }
+
+                .hero {
+                    padding: 70px 0;
+                }
+            }
+
+            @@media (max-width: 576px) {
+                .hero {
+                    padding: 60px 0;
+                }
+
+                    .hero h1 {
+                        font-size: 35px;
+                    }
+
+                .search-container {
+                    flex-direction: column;
+                    gap: 5px;
+                }
+
+                    .search-container input {
+                        width: 100%;
+                    }
+
+                .btn-search {
+                    width: 100%;
+                }
+
+                .section-padding {
+                    padding: 55px 0;
+                }
+
+                .section-heading h2 {
+                    font-size: 24px;
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVIGATION -->
+
+    <nav class="navbar navbar-expand-lg main-navbar">
+        <div class="container">
+
+            <a class="navbar-brand brand" asp-page="/Index">
+
+                <div class="brand-logo">
+                    <i class="bi bi-book-half"></i>
                 </div>
+
+                <span class="brand-title">
+                    BIBLIOTHÈQUE DE MAYIDI
+                    <small class="brand-subtitle">
+                        Saint Robert Bellarmin
+                    </small>
+                </span>
+
+            </a>
+
+            <button class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNavigation"
+                    aria-controls="mainNavigation"
+                    aria-expanded="false"
+                    aria-label="Ouvrir le menu">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavigation">
+
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Index">
+                            Accueil
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-page="/Catalogue/Index">
+                            Catalogue
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#domaines">
+                            Domaines
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#presentation">
+                            À propos
+                        </a>
+                    </li>
+
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn-connexion" asp-page="/Connexion">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Se connecter
+                        </a>
+                    </li>
+
+                </ul>
+
             </div>
+
+        </div>
+    </nav>
+
+
+    <!-- BANNIERE PRINCIPALE -->
+
+    <section class="hero">
+
+        <div class="container">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <span class="hero-label">
+                        SAVOIR · FOI · CULTURE
+                    </span>
+
+                    <h1>
+                        La connaissance éclaire l'esprit
+                        et nourrit la sagesse.
+                    </h1>
+
+                    <p class="hero-description">
+                        Bienvenue à la Bibliothèque du Grand Séminaire
+                        de Mayidi, Saint Robert Bellarmin.
+
+                        Découvrez un patrimoine documentaire au service
+                        de la formation intellectuelle, philosophique,
+                        théologique et humaine.
+                    </p>
+
+                    <!-- RECHERCHE DOCUMENTAIRE -->
+
+                    <form method="get"
+                          asp-page="/Catalogue/Index"
+                          class="search-container">
+
+                        <input type="text"
+                               name="Recherche"
+                               class="form-control"
+                               placeholder="Rechercher un livre, un auteur, une collection..." />
+
+                        <button type="submit" class="btn-search">
+                            <i class="bi bi-search me-2"></i>
+                            Rechercher
+                        </button>
+
+                    </form>
+
+                    <a asp-page="/Catalogue/Index" class="btn-explorer">
+                        Explorer le catalogue
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+                <div class="col-lg-4 d-none d-lg-block">
+
+                    <div class="hero-illustration">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-primary">
-                <div class="card-body p-4">
-                    <div class="fs-1 mb-3">↩️</div>
-                    <h3 class="h5">Retours des livres</h3>
-                    <p class="text-muted">
-                        Enregistrer les retours, contrôler l'état des ouvrages
-                        et remettre les exemplaires en disponibilité lorsque cela est autorisé.
-                    </p>
-                    <a asp-page="/Retours/Index"
-                       class="btn btn-primary">
-                        Gérer les retours
-                    </a>
-                </div>
+    </section>
+
+
+    <!-- PRESENTATION -->
+
+    <section class="section-padding" id="presentation">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <span>Notre mission</span>
+
+                <h2>
+                    Une bibliothèque au service de la formation
+                </h2>
+
+                <p>
+                    Un espace de recherche, de découverte et
+                    d'approfondissement du savoir.
+                </p>
+
             </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-4">
+
+                    <div class="feature-card">
+
+                        <div class="feature-icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+
+                        <h3>Richesse documentaire</h3>
+
+                        <p>
+                            Découvrez les ouvrages de philosophie,
+                            de théologie, de droit canonique,
+                            d'Écriture Sainte et de nombreuses
+                            autres disciplines.
+                        </p>
+
+                        <a asp-page="/Catalogue/Index" class="feature-link">
+                            Consulter les ouvrages
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="feature-card">
+
+                        <div class="feature-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+
+                        <h3>Recherche documentaire</h3>
+
+                        <p>
+                            Retrouvez facilement les documents
+                            grâce à la recherche par titre,
+                            auteur, collection ou type de document.
+                        </p>
+
+                        <a asp-page="/Catalogue/Index" class="feature-link">
+                            Effectuer une recherche
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="feature-card">
+
+                        <div class="feature-icon">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+
+                        <h3>Espace personnel</h3>
+
+                        <p>
+                            Accédez à votre compte pour suivre
+                            vos réservations, consulter vos emprunts
+                            et retrouver vos activités.
+                        </p>
+
+                        <a asp-page="/Connexion" class="feature-link">
+                            Accéder à mon espace
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body p-4">
-                    <div class="fs-1 mb-3">🔎</div>
-                    <h3 class="h5">Catalogue</h3>
-                    <p class="text-muted">
-                        Rechercher les documents et les exemplaires de la bibliothèque.
-                    </p>
-                    <a asp-page="/Catalogue/Index"
-                       class="btn btn-outline-primary">
-                        Consulter le catalogue
-                    </a>
-                </div>
+    </section>
+
+
+    <!-- DOMAINES DOCUMENTAIRES -->
+
+    <section class="section-padding domains-section" id="domaines">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <span>Nos ressources</span>
+
+                <h2>Explorez nos domaines documentaires</h2>
+
+                <p>
+                    Un patrimoine intellectuel couvrant
+                    plusieurs disciplines.
+                </p>
+
             </div>
+
+            <div class="row g-3">
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-lightbulb"></i>
+                        </div>
+                        <h4>Philosophie</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-cross"></i>
+                        </div>
+                        <h4>Théologie dogmatique</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                        <h4>Écritures saintes</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-bank"></i>
+                        </div>
+                        <h4>Droit canonique</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <h4>Afrique et civilisation africaine</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h4>Pastorale</h4>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-5">
+
+                <a asp-page="/Catalogue/Index"
+                   class="btn btn-primary px-4 py-3"
+                   style="background:#102f59;border-color:#102f59;">
+
+                    Découvrir toutes les collections
+                    <i class="bi bi-arrow-right ms-2"></i>
+
+                </a>
+
+            </div>
+
         </div>
 
-    </div>
+    </section>
 
-    <div class="alert alert-light border mt-5">
-        <strong>Bibliothèque de Mayidi</strong>
-        <p class="mb-0 mt-1">
-            Utilise les modules correspondant à tes autorisations pour gérer
-            les activités de la bibliothèque.
-        </p>
-    </div>
 
-</div>
+    <!-- APPEL A L'ACTION -->
+
+    <section class="section-padding">
+
+        <div class="container">
+
+            <div class="cta">
+
+                <h2>
+                    Votre parcours de connaissance commence ici.
+                </h2>
+
+                <p class="mt-3">
+                    Consultez notre catalogue ou connectez-vous
+                    pour accéder à votre espace personnel.
+                </p>
+
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+
+                    <a asp-page="/Catalogue/Index" class="btn">
+                        <i class="bi bi-book me-2"></i>
+                        Explorer le catalogue
+                    </a>
+
+                    <a asp-page="/Connexion" class="btn">
+                        <i class="bi bi-person-lock me-2"></i>
+                        Se connecter
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <div class="container">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <h5 class="footer-title">
+                        <i class="bi bi-book-half me-2"></i>
+                        Bibliothèque de Mayidi
+                    </h5>
+
+                    <p class="footer-text mt-3">
+                        Bibliothèque du Grand Séminaire de Mayidi,
+                        Saint Robert Bellarmin.
+
+                        Au service de la formation intellectuelle,
+                        spirituelle et humaine.
+                    </p>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <h5 class="footer-title">Navigation</h5>
+
+                    <a asp-page="/Index" class="footer-link">
+                        Accueil
+                    </a>
+
+                    <a asp-page="/Catalogue/Index" class="footer-link">
+                        Catalogue
+                    </a>
+
+                    <a href="#presentation" class="footer-link">
+                        À propos
+                    </a>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <h5 class="footer-title">Espace utilisateur</h5>
+
+                    <a asp-page="/Connexion" class="footer-link">
+                        Se connecter
+                    </a>
+
+                    <a asp-page="/InscriptionLecteur" class="footer-link">
+                        Inscription lecteur
+                    </a>
+
+                    <a asp-page="/Catalogue/Index" class="footer-link">
+                        Rechercher un ouvrage
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+
+                © @DateTime.Now.Year
+                Bibliothèque du Grand Séminaire de Mayidi -
+                Saint Robert Bellarmin.
+
+                <br />
+
+                Tous droits réservés.
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- SCRIPTS -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+</body>
+</html>

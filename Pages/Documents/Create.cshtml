@@ -1,340 +1,529 @@
-﻿
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
-using bibliotheque_mayidi.Data.Generated;
-using bibliotheque_mayidi.Models.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+﻿@page
+@model bibliotheque_mayidi.Pages.Documents.CreateModel
 
-namespace bibliotheque_mayidi.Pages.Documents;
+@{
+    ViewData["Title"] = "Ajouter un document";
+}
 
-public class CreateModel : PageModel
-{
-    private readonly BibliothequeScaffoldContext _context;
-
-    public CreateModel(BibliothequeScaffoldContext context)
-    {
-        _context = context;
+<style>
+    body {
+        background: #f4f7f5;
     }
 
-    [BindProperty]
-    public DocumentInput Input { get; set; } = new();
-
-    public IList<TypesDocument> Types { get; set; } = new List<TypesDocument>();
-    public IList<Editeur> Editeurs { get; set; } = new List<Editeur>();
-    public IList<Collection> Collections { get; set; } = new List<Collection>();
-    public IList<Rayon> Rayons { get; set; } = new List<Rayon>();
-    public IList<Etagere> Etageres { get; set; } = new List<Etagere>();
-    public IList<Emplacement> Emplacements { get; set; } = new List<Emplacement>();
-
-    public class DocumentInput
-    {
-        [Required(ErrorMessage = "Le titre est obligatoire.")]
-        [StringLength(255)]
-        public string Titre { get; set; } = string.Empty;
-
-        [StringLength(255)]
-        public string? SousTitre { get; set; }
-
-        [Required(ErrorMessage = "Sélectionnez un type de document.")]
-        public string CodeTypeDocument { get; set; } = string.Empty;
-
-        public int? CodeCollection { get; set; }
-        public int? CodeEditeur { get; set; }
-
-        [StringLength(50)]
-        public string? IsbnIssn { get; set; }
-
-        [StringLength(100)]
-        public string? Edition { get; set; }
-
-        [StringLength(150)]
-        public string? LieuPublication { get; set; }
-
-        [Range(1, 2100, ErrorMessage = "L'année doit être valide.")]
-        public int? AnneePublication { get; set; }
-
-        [StringLength(50)]
-        public string? Langue { get; set; }
-
-        [Range(1, 100000, ErrorMessage = "Le nombre de pages doit être positif.")]
-        public int? NombrePages { get; set; }
-
-        public string? Resume { get; set; }
-        public string? MotsCles { get; set; }
-
-        public bool EmpruntAutorise { get; set; } = true;
-
-        [Required(ErrorMessage = "Le nom de l'auteur est obligatoire.")]
-        [StringLength(150)]
-        public string NomAuteur { get; set; } = string.Empty;
-
-        [StringLength(150)]
-        public string? PrenomAuteur { get; set; }
-
-        [StringLength(100)]
-        public string? DatesAuteur { get; set; }
-
-        public string? NoticeBiographique { get; set; }
-
-        // Localisation physique
-        [Required(ErrorMessage = "Sélectionnez un rayon.")]
-        public string CodeRayon { get; set; } = string.Empty;
-
-        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une étagère.")]
-        public int CodeEtagere { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une place.")]
-        public int CodeEmplacement { get; set; }
-
-        [Required(ErrorMessage = "La cote est obligatoire.")]
-        [StringLength(100)]
-        public string Cote { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Le numéro d'inventaire est obligatoire.")]
-        [StringLength(100)]
-        public string NumeroInventaire { get; set; } = string.Empty;
+    .page-entete {
+        background: linear-gradient(120deg, #14532d, #166534);
+        color: white;
+        padding: 28px;
+        border-radius: 14px;
+        margin-bottom: 25px;
     }
 
-    public async Task OnGetAsync()
-    {
-        await ChargerListesAsync();
+    .form-section {
+        background: white;
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 22px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.05);
     }
 
-    public async Task<IActionResult> OnPostAsync()
+        .form-section .card-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 17px 20px;
+            font-weight: 700;
+            color: #14532d;
+        }
+
+        .form-section .card-body {
+            padding: 22px;
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #166534;
+            box-shadow: 0 0 0 .2rem rgba(22,101,52,.12);
+        }
+
+    .btn-bibliotheque {
+        background: #14532d;
+        color: white;
+        border: none;
+    }
+
+        .btn-bibliotheque:hover {
+            background: #166534;
+            color: white;
+        }
+
+    .obligatoire {
+        color: #dc2626;
+    }
+</style>
+
+<div class="container py-4">
+
+    <!-- EN-TÊTE -->
+    <div class="page-entete">
+        <h1 class="h3 mb-2">
+            <i class="bi bi-journal-plus me-2"></i>
+            Ajouter un document
+        </h1>
+
+        <p class="mb-0">
+            Bibliothèque du Grand Séminaire Saint Robert Bellarmin de Mayidi
+        </p>
+
+        <small>
+            Enregistrement de la notice bibliographique, de l'auteur
+            et du premier exemplaire physique.
+        </small>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-page="/Bibliothecaire/Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+            Retour à l'espace bibliothécaire
+        </a>
+
+        <a asp-page="/Documents/Index"
+           class="btn btn-outline-success">
+            <i class="bi bi-list-ul"></i>
+            Liste des documents
+        </a>
+    </div>
+
+    <!-- MESSAGES -->
+    @if (TempData["Succes"] is string succes)
     {
-        await ChargerListesAsync();
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @succes
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+    }
 
-        if (!ModelState.IsValid)
-            return Page();
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger"
+         role="alert"></div>
 
-        // Vérifier le type de document.
-        bool typeExiste = await _context.TypesDocuments
-            .AnyAsync(t => t.CodeTypeDocument == Input.CodeTypeDocument);
+    <form method="post">
 
-        if (!typeExiste)
-        {
-            ModelState.AddModelError(
-                "Input.CodeTypeDocument",
-                "Le type de document sélectionné n'existe pas.");
+        <!-- 1. NOTICE BIBLIOGRAPHIQUE -->
+        <div class="card form-section">
+            <div class="card-header">
+                <i class="bi bi-book-half me-2"></i>
+                1. Informations bibliographiques
+            </div>
 
-            return Page();
-        }
+            <div class="card-body">
+                <div class="row g-3">
 
-        // Vérifier la collection.
-        if (Input.CodeCollection.HasValue &&
-            !await _context.Collections.AnyAsync(
-                c => c.CodeCollection == Input.CodeCollection.Value))
-        {
-            ModelState.AddModelError(
-                "Input.CodeCollection",
-                "La collection sélectionnée n'existe pas.");
+                    <div class="col-md-8">
+                        <label asp-for="Input.Titre" class="form-label">
+                            Titre <span class="obligatoire">*</span>
+                        </label>
+                        <input asp-for="Input.Titre" class="form-control"
+                               placeholder="Titre complet du document" />
+                        <span asp-validation-for="Input.Titre"
+                              class="text-danger"></span>
+                    </div>
 
-            return Page();
-        }
+                    <div class="col-md-4">
+                        <label asp-for="Input.SousTitre" class="form-label">
+                            Sous-titre
+                        </label>
+                        <input asp-for="Input.SousTitre"
+                               class="form-control" />
+                        <span asp-validation-for="Input.SousTitre"
+                              class="text-danger"></span>
+                    </div>
 
-        // Vérifier l'éditeur.
-        if (Input.CodeEditeur.HasValue &&
-            !await _context.Editeurs.AnyAsync(
-                e => e.CodeEditeur == Input.CodeEditeur.Value))
-        {
-            ModelState.AddModelError(
-                "Input.CodeEditeur",
-                "L'éditeur sélectionné n'existe pas.");
+                    <div class="col-md-6">
+                        <label asp-for="Input.CodeTypeDocument"
+                               class="form-label">
+                            Type de document <span class="obligatoire">*</span>
+                        </label>
+                        <select asp-for="Input.CodeTypeDocument"
+                                class="form-select">
+                            <option value="">-- Sélectionner un type --</option>
+                            @foreach (var type in Model.Types)
+                            {
+                                <option value="@type.CodeTypeDocument">
+                                    @type.NomTypeDocument
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeTypeDocument"
+                              class="text-danger"></span>
+                    </div>
 
-            return Page();
-        }
+                    <div class="col-md-6">
+                        <label asp-for="Input.CodeCollection"
+                               class="form-label">
+                            Collection
+                        </label>
+                        <select asp-for="Input.CodeCollection"
+                                class="form-select">
+                            <option value="">-- Aucune collection --</option>
+                            @foreach (var collection in Model.Collections)
+                            {
+                                <option value="@collection.CodeCollection">
+                                    @collection.NomCollection
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeCollection"
+                              class="text-danger"></span>
+                    </div>
 
-        // Vérifier la cohérence rayon / étagère / place.
-        bool localisationValide = await _context.Emplacements
-            .AnyAsync(e =>
-                e.CodeEmplacement == Input.CodeEmplacement &&
-                e.Actif &&
-                e.CodeEtagere == Input.CodeEtagere &&
-                e.CodeEtagereNavigation.CodeRayon == Input.CodeRayon &&
-                e.CodeEtagereNavigation.Actif &&
-                e.CodeEtagereNavigation.CodeRayonNavigation.Actif);
+                    <div class="col-md-6">
+                        <label asp-for="Input.CodeEditeur"
+                               class="form-label">
+                            Éditeur
+                        </label>
+                        <select asp-for="Input.CodeEditeur"
+                                class="form-select">
+                            <option value="">-- Sélectionner un éditeur --</option>
+                            @foreach (var editeur in Model.Editeurs)
+                            {
+                                <option value="@editeur.CodeEditeur">
+                                    @editeur.NomEditeur
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeEditeur"
+                              class="text-danger"></span>
+                    </div>
 
-        if (!localisationValide)
-        {
-            ModelState.AddModelError(
-                "Input.CodeEmplacement",
-                "La localisation sélectionnée est invalide ou inactive.");
+                    <div class="col-md-6">
+                        <label asp-for="Input.IsbnIssn" class="form-label">
+                            ISBN / ISSN
+                        </label>
+                        <input asp-for="Input.IsbnIssn"
+                               class="form-control"
+                               placeholder="ISBN ou ISSN" />
+                        <span asp-validation-for="Input.IsbnIssn"
+                              class="text-danger"></span>
+                    </div>
 
-            return Page();
-        }
+                    <div class="col-md-4">
+                        <label asp-for="Input.Edition" class="form-label">
+                            Édition
+                        </label>
+                        <input asp-for="Input.Edition" class="form-control" />
+                        <span asp-validation-for="Input.Edition"
+                              class="text-danger"></span>
+                    </div>
 
-        // Vérifier l'unicité du numéro d'inventaire.
-        string numeroInventaire = Input.NumeroInventaire.Trim();
+                    <div class="col-md-4">
+                        <label asp-for="Input.LieuPublication"
+                               class="form-label">
+                            Lieu de publication
+                        </label>
+                        <input asp-for="Input.LieuPublication"
+                               class="form-control" />
+                        <span asp-validation-for="Input.LieuPublication"
+                              class="text-danger"></span>
+                    </div>
 
-        bool inventaireExiste = await _context.Exemplaires
-            .AnyAsync(e => e.NumeroInventaire == numeroInventaire);
+                    <div class="col-md-4">
+                        <label asp-for="Input.AnneePublication"
+                               class="form-label">
+                            Année de publication
+                        </label>
+                        <input asp-for="Input.AnneePublication"
+                               type="number" class="form-control"
+                               min="1" max="2100" />
+                        <span asp-validation-for="Input.AnneePublication"
+                              class="text-danger"></span>
+                    </div>
 
-        if (inventaireExiste)
-        {
-            ModelState.AddModelError(
-                "Input.NumeroInventaire",
-                "Ce numéro d'inventaire existe déjà.");
+                    <div class="col-md-6">
+                        <label asp-for="Input.Langue" class="form-label">
+                            Langue
+                        </label>
+                        <input asp-for="Input.Langue"
+                               class="form-control"
+                               placeholder="Ex. : Français, Latin..." />
+                        <span asp-validation-for="Input.Langue"
+                              class="text-danger"></span>
+                    </div>
 
-            return Page();
-        }
+                    <div class="col-md-6">
+                        <label asp-for="Input.NombrePages"
+                               class="form-label">
+                            Nombre de pages
+                        </label>
+                        <input asp-for="Input.NombrePages"
+                               type="number" min="1"
+                               class="form-control" />
+                        <span asp-validation-for="Input.NombrePages"
+                              class="text-danger"></span>
+                    </div>
 
-        await using var transaction =
-            await _context.Database.BeginTransactionAsync();
+                    <div class="col-12">
+                        <label asp-for="Input.Resume" class="form-label">
+                            Résumé / Description
+                        </label>
+                        <textarea asp-for="Input.Resume"
+                                  class="form-control" rows="4"
+                                  placeholder="Présentez brièvement le contenu du document..."></textarea>
+                        <span asp-validation-for="Input.Resume"
+                              class="text-danger"></span>
+                    </div>
 
-        try
-        {
-            // Rechercher l'auteur existant ou le créer.
-            string nomAuteur = Input.NomAuteur.Trim();
-            string? prenomAuteur = Nettoyer(Input.PrenomAuteur);
+                    <div class="col-12">
+                        <label asp-for="Input.MotsCles" class="form-label">
+                            Mots-clés
+                        </label>
+                        <input asp-for="Input.MotsCles"
+                               class="form-control"
+                               placeholder="Ex. : théologie, philosophie, Église..." />
+                        <span asp-validation-for="Input.MotsCles"
+                              class="text-danger"></span>
+                    </div>
 
-            Auteur? auteur = await _context.Auteurs.FirstOrDefaultAsync(a =>
-                a.NomAuteur.ToLower() == nomAuteur.ToLower() &&
-                (a.PrenomAuteur ?? "").ToLower() ==
-                (prenomAuteur ?? "").ToLower());
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="Input.EmpruntAutorise"
+                                   class="form-check-input" />
+                            <label asp-for="Input.EmpruntAutorise"
+                                   class="form-check-label">
+                                Autoriser l'emprunt de ce document
+                            </label>
+                        </div>
+                    </div>
 
-            if (auteur == null)
-            {
-                auteur = new Auteur
-                {
-                    NomAuteur = nomAuteur,
-                    PrenomAuteur = prenomAuteur,
-                    DatesAuteur = Nettoyer(Input.DatesAuteur),
-                    NoticeBiographique = Nettoyer(Input.NoticeBiographique)
-                };
+                </div>
+            </div>
+        </div>
 
-                _context.Auteurs.Add(auteur);
+        <!-- 2. AUTEUR -->
+        <div class="card form-section">
+            <div class="card-header">
+                <i class="bi bi-person-lines-fill me-2"></i>
+                2. Informations sur l'auteur
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.NomAuteur" class="form-label">
+                            Nom de l'auteur <span class="obligatoire">*</span>
+                        </label>
+                        <input asp-for="Input.NomAuteur"
+                               class="form-control" />
+                        <span asp-validation-for="Input.NomAuteur"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.PrenomAuteur"
+                               class="form-label">
+                            Prénom de l'auteur
+                        </label>
+                        <input asp-for="Input.PrenomAuteur"
+                               class="form-control" />
+                        <span asp-validation-for="Input.PrenomAuteur"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.DatesAuteur"
+                               class="form-label">
+                            Dates de naissance et de décès
+                        </label>
+                        <input asp-for="Input.DatesAuteur"
+                               class="form-control"
+                               placeholder="Ex. : 1920-2005" />
+                        <span asp-validation-for="Input.DatesAuteur"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Input.NoticeBiographique"
+                               class="form-label">
+                            Notice biographique
+                        </label>
+                        <textarea asp-for="Input.NoticeBiographique"
+                                  class="form-control" rows="3"
+                                  placeholder="Quelques informations sur l'auteur..."></textarea>
+                        <span asp-validation-for="Input.NoticeBiographique"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PREMIER EXEMPLAIRE -->
+        <div class="card form-section">
+            <div class="card-header">
+                <i class="bi bi-geo-alt me-2"></i>
+                3. Localisation du premier exemplaire physique
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Le premier exemplaire physique sera automatiquement créé.
+                    Son numéro d'inventaire sera attribué par le système et
+                    rattaché à votre session d'enregistrement en cours.
+                </div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.CodeRayon"
+                               class="form-label">
+                            Rayon <span class="obligatoire">*</span>
+                        </label>
+                        <select asp-for="Input.CodeRayon"
+                                class="form-select" id="CodeRayon">
+                            <option value="">-- Choisir un rayon --</option>
+                            @foreach (var rayon in Model.Rayons)
+                            {
+                                <option value="@rayon.CodeRayon">
+                                    @rayon.NomRayon
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeRayon"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.CodeEtagere"
+                               class="form-label">
+                            Étagère <span class="obligatoire">*</span>
+                        </label>
+                        <select asp-for="Input.CodeEtagere"
+                                class="form-select" id="CodeEtagere">
+                            <option value="">-- Choisir une étagère --</option>
+                            @foreach (var etagere in Model.Etageres)
+                            {
+                                <option value="@etagere.CodeEtagere"
+                                        data-rayon="@etagere.CodeRayon">
+                                    @etagere.NumeroEtagereRoman
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeEtagere"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Input.CodeEmplacement"
+                               class="form-label">
+                            Place <span class="obligatoire">*</span>
+                        </label>
+                        <select asp-for="Input.CodeEmplacement"
+                                class="form-select" id="CodeEmplacement">
+                            <option value="">-- Choisir une place --</option>
+                            @foreach (var emplacement in Model.Emplacements)
+                            {
+                                <option value="@emplacement.CodeEmplacement"
+                                        data-etagere="@emplacement.CodeEtagere">
+                                    @emplacement.NumeroPlace
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="Input.CodeEmplacement"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Input.Cote" class="form-label">
+                            Cote <span class="obligatoire">*</span>
+                        </label>
+                        <input asp-for="Input.Cote"
+                               class="form-control"
+                               placeholder="Ex. : PHILO-X/1" />
+                        <span asp-validation-for="Input.Cote"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-5">
+
+            <a asp-page="/Documents/Index"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-1"></i>
+                Annuler
+            </a>
+
+            <button type="submit" class="btn btn-bibliotheque btn-lg">
+                <i class="bi bi-save me-2"></i>
+                Enregistrer le document
+            </button>
+
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const rayon = document.getElementById("CodeRayon");
+            const etagere = document.getElementById("CodeEtagere");
+            const emplacement = document.getElementById("CodeEmplacement");
+
+            function filtrerEtageres() {
+                const rayonChoisi = rayon.value;
+
+                Array.from(etagere.options).forEach(option => {
+                    if (!option.value) return;
+
+                    option.hidden = option.dataset.rayon !== rayonChoisi;
+                });
+
+                if (etagere.selectedOptions[0]?.hidden) {
+                    etagere.value = "";
+                }
+
+                filtrerEmplacements();
             }
 
-            // Créer la notice bibliographique.
-            var document = new Document
-            {
-                Titre = Input.Titre.Trim(),
-                SousTitre = Nettoyer(Input.SousTitre),
-                CodeTypeDocument = Input.CodeTypeDocument,
-                CodeCollection = Input.CodeCollection,
-                CodeEditeur = Input.CodeEditeur,
-                IsbnIssn = Nettoyer(Input.IsbnIssn),
-                Edition = Nettoyer(Input.Edition),
-                LieuPublication = Nettoyer(Input.LieuPublication),
-                AnneePublication = Input.AnneePublication,
-                Langue = Nettoyer(Input.Langue),
-                NombrePages = Input.NombrePages,
-                Resume = Nettoyer(Input.Resume),
-                MotsCles = Nettoyer(Input.MotsCles),
-                EmpruntAutorise = Input.EmpruntAutorise,
-                StatutNotice = "VALIDE",
-                DateEncodage = DateTime.Now
-            };
+            function filtrerEmplacements() {
+                const etagereChoisie = etagere.value;
 
-            document.DocumentsAuteurs.Add(new DocumentsAuteur
-            {
-                CodeAuteurNavigation = auteur,
-                OrdreAffichage = 1,
-                RoleAuteur = "AUTEUR"
-            });
+                Array.from(emplacement.options).forEach(option => {
+                    if (!option.value) return;
 
-            _context.Documents.Add(document);
+                    option.hidden =
+                        option.dataset.etagere !== etagereChoisie;
+                });
 
-            // Enregistrer pour obtenir le code du document.
-            await _context.SaveChangesAsync();
+                if (emplacement.selectedOptions[0]?.hidden) {
+                    emplacement.value = "";
+                }
+            }
 
-            // Récupérer le compte utilisateur connecté.
-            int? codeCompte = null;
+            rayon.addEventListener("change", filtrerEtageres);
+            etagere.addEventListener("change", filtrerEmplacements);
 
-            string? identifiantCompte =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (int.TryParse(identifiantCompte, out int compte))
-                codeCompte = compte;
-
-            // Créer le premier exemplaire physique.
-            var exemplaire = new Exemplaire
-            {
-                CodeDocument = document.CodeDocument,
-                CodeEmplacement = Input.CodeEmplacement,
-                Cote = Input.Cote.Trim(),
-                NumeroInventaire = numeroInventaire,
-                DeviseValeur = "CDF",
-                EtatDocument = "BON",
-                StatutExemplaire = "DISPONIBLE",
-                DateCreation = DateTime.Now,
-                EncodePar = codeCompte
-            };
-
-            _context.Exemplaires.Add(exemplaire);
-
-            await _context.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-
-            TempData["Succes"] =
-                $"Le document « {document.Titre} », son auteur et son exemplaire ont été enregistrés. " +
-                $"Cote : {exemplaire.Cote} ; inventaire : {exemplaire.NumeroInventaire}.";
-
-            return RedirectToPage("./Index");
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-
-            ModelState.AddModelError(
-                string.Empty,
-                "L'enregistrement a échoué. Aucune création partielle n'a été conservée. " +
-                "Vérifiez les données saisies et réessayez.");
-
-            await ChargerListesAsync();
-
-            return Page();
-        }
-    }
-
-    private async Task ChargerListesAsync()
-    {
-        Types = await _context.TypesDocuments
-            .AsNoTracking()
-            .OrderBy(t => t.NomTypeDocument)
-            .ToListAsync();
-
-        Editeurs = await _context.Editeurs
-            .AsNoTracking()
-            .OrderBy(e => e.NomEditeur)
-            .ToListAsync();
-
-        Collections = await _context.Collections
-            .AsNoTracking()
-            .OrderBy(c => c.NomCollection)
-            .ToListAsync();
-
-        Rayons = await _context.Rayons
-            .AsNoTracking()
-            .Where(r => r.Actif)
-            .OrderBy(r => r.NomRayon)
-            .ToListAsync();
-
-        Etageres = await _context.Etageres
-            .AsNoTracking()
-            .Where(e => e.Actif && e.CodeRayonNavigation.Actif)
-            .OrderBy(e => e.CodeRayon)
-            .ThenBy(e => e.NumeroEtagereRoman)
-            .ToListAsync();
-
-        Emplacements = await _context.Emplacements
-            .AsNoTracking()
-            .Where(e =>
-                e.Actif &&
-                e.CodeEtagereNavigation.Actif &&
-                e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
-            .OrderBy(e => e.CodeEtagere)
-            .ThenBy(e => e.NumeroPlace)
-            .ToListAsync();
-    }
-
-    private static string? Nettoyer(string? valeur)
-    {
-        return string.IsNullOrWhiteSpace(valeur)
-            ? null
-            : valeur.Trim();
-    }
+            filtrerEtageres();
+        });
+    </script>
 }

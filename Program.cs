@@ -1,4 +1,3 @@
-
 using bibliotheque_mayidi.Data.Generated;
 using bibliotheque_mayidi.Models.Entities;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -10,10 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuration des pages Razor.
 builder.Services.AddRazorPages(options =>
 {
-    // Connexion obligatoire par défaut.
+    // Toutes les pages nécessitent une connexion par défaut.
     options.Conventions.AuthorizeFolder("/");
 
-    // Pages accessibles sans connexion.
+    // Pages accessibles sans authentification.
+    options.Conventions.AllowAnonymousToPage("/Index");
+    options.Conventions.AllowAnonymousToPage("/Catalogue/Index");
     options.Conventions.AllowAnonymousToPage("/Connexion");
     options.Conventions.AllowAnonymousToPage("/Error");
     options.Conventions.AllowAnonymousToPage("/DiagnosticBase");
@@ -52,7 +53,6 @@ builder.Services
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
 
-        // Adapté au profil HTTP ou HTTPS utilisé en développement.
         options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
@@ -80,7 +80,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Laisser Razor Pages gérer les routes.
+// Routes Razor Pages.
 app.MapRazorPages();
 
 app.Run();

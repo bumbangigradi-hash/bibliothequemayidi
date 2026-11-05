@@ -58,7 +58,8 @@ public class CreateModel : PageModel
         [StringLength(50)]
         public string? Langue { get; set; }
 
-        [Range(1, 100000, ErrorMessage = "Le nombre de pages doit être positif.")]
+        [Range(1, 100000,
+            ErrorMessage = "Le nombre de pages doit être positif.")]
         public int? NombrePages { get; set; }
 
         public string? Resume { get; set; }
@@ -82,19 +83,17 @@ public class CreateModel : PageModel
         [Required(ErrorMessage = "Sélectionnez un rayon.")]
         public string CodeRayon { get; set; } = string.Empty;
 
-        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une étagère.")]
+        [Range(1, int.MaxValue,
+            ErrorMessage = "Sélectionnez une étagère.")]
         public int CodeEtagere { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une place.")]
+        [Range(1, int.MaxValue,
+            ErrorMessage = "Sélectionnez une place.")]
         public int CodeEmplacement { get; set; }
 
         [Required(ErrorMessage = "La cote est obligatoire.")]
         [StringLength(100)]
         public string Cote { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Le numéro d'inventaire est obligatoire.")]
-        [StringLength(100)]
-        public string NumeroInventaire { get; set; } = string.Empty;
     }
 
     public async Task OnGetAsync()
@@ -109,75 +108,13 @@ public class CreateModel : PageModel
         if (!ModelState.IsValid)
             return Page();
 
-        // Vérifier le type de document.
-        bool typeExiste = await _context.TypesDocuments
-            .AnyAsync(t => t.CodeTypeDocument == Input.CodeTypeDocument);
+        // Identifier le compte connecté.
+        string? identifiantCompte =
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (!typeExiste)
+        if (!int.TryParse(identifiantCompte, out int codeCompte))
         {
-            ModelState.AddModelError(
-                "Input.CodeTypeDocument",
-                "Le type de document sélectionné n'existe pas.");
-
-            return Page();
-        }
-
-        // Vérifier la collection.
-        if (Input.CodeCollection.HasValue &&
-            !await _context.Collections.AnyAsync(
-                c => c.CodeCollection == Input.CodeCollection.Value))
-        {
-            ModelState.AddModelError(
-                "Input.CodeCollection",
-                "La collection sélectionnée n'existe pas.");
-
-            return Page();
-        }
-
-        // Vérifier l'éditeur.
-        if (Input.CodeEditeur.HasValue &&
-            !await _context.Editeurs.AnyAsync(
-                e => e.CodeEditeur == Input.CodeEditeur.Value))
-        {
-            ModelState.AddModelError(
-                "Input.CodeEditeur",
-                "L'éditeur sélectionné n'existe pas.");
-
-            return Page();
-        }
-
-        // Vérifier la cohérence rayon / étagère / place.
-        bool localisationValide = await _context.Emplacements
-            .AnyAsync(e =>
-                e.CodeEmplacement == Input.CodeEmplacement &&
-                e.Actif &&
-                e.CodeEtagere == Input.CodeEtagere &&
-                e.CodeEtagereNavigation.CodeRayon == Input.CodeRayon &&
-                e.CodeEtagereNavigation.Actif &&
-                e.CodeEtagereNavigation.CodeRayonNavigation.Actif);
-
-        if (!localisationValide)
-        {
-            ModelState.AddModelError(
-                "Input.CodeEmplacement",
-                "La localisation sélectionnée est invalide ou inactive.");
-
-            return Page();
-        }
-
-        // Vérifier l'unicité du numéro d'inventaire.
-        string numeroInventaire = Input.NumeroInventaire.Trim();
-
-        bool inventaireExiste = await _context.Exemplaires
-            .AnyAsync(e => e.NumeroInventaire == numeroInventaire);
-
-        if (inventaireExiste)
-        {
-            ModelState.AddModelError(
-                "Input.NumeroInventaire",
-                "Ce numéro d'inventaire existe déjà.");
-
-            return Page();
+            return Forbid();
         }
 
         await using var transaction =
@@ -185,6 +122,91 @@ public class CreateModel : PageModel
 
         try
         {
+            // Vérifier que le bibliothécaire possède une session ouverte.
+            long codeSession = await _context.Database
+                .SqlQuery<long>($"""
+                    SELECT code_session AS "Value"
+                    FROM "SESSIONS_ENREGISTREMENT"
+                    WHERE code_compte = {codeCompte}
+                      AND statut_session = 'EN_COURS'
+                    ORDER BY date_ouverture DESC
+                    LIMIT 1
+                    """)
+                .SingleOrDefaultAsync();
+
+            if (codeSession <= 0)
+            {
+                await transaction.RollbackAsync();
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Aucune session d'enregistrement n'est ouverte. " +
+                    "Veuillez ouvrir une session avant d'ajouter un document.");
+
+                return Page();
+            }
+
+            // Vérifier le type de document.
+            bool typeExiste = await _context.TypesDocuments
+                .AnyAsync(t =>
+                    t.CodeTypeDocument == Input.CodeTypeDocument);
+
+            if (!typeExiste)
+            {
+                ModelState.AddModelError(
+                    "Input.CodeTypeDocument",
+                    "Le type de document sélectionné n'existe pas.");
+
+                await transaction.RollbackAsync();
+                return Page();
+            }
+
+            // Vérifier la collection.
+            if (Input.CodeCollection.HasValue &&
+                !await _context.Collections.AnyAsync(
+                    c => c.CodeCollection == Input.CodeCollection.Value))
+            {
+                ModelState.AddModelError(
+                    "Input.CodeCollection",
+                    "La collection sélectionnée n'existe pas.");
+
+                await transaction.RollbackAsync();
+                return Page();
+            }
+
+            // Vérifier l'éditeur.
+            if (Input.CodeEditeur.HasValue &&
+                !await _context.Editeurs.AnyAsync(
+                    e => e.CodeEditeur == Input.CodeEditeur.Value))
+            {
+                ModelState.AddModelError(
+                    "Input.CodeEditeur",
+                    "L'éditeur sélectionné n'existe pas.");
+
+                await transaction.RollbackAsync();
+                return Page();
+            }
+
+            // Vérifier la cohérence rayon / étagère / place.
+            bool localisationValide = await _context.Emplacements
+                .AnyAsync(e =>
+                    e.CodeEmplacement == Input.CodeEmplacement &&
+                    e.Actif &&
+                    e.CodeEtagere == Input.CodeEtagere &&
+                    e.CodeEtagereNavigation.CodeRayon == Input.CodeRayon &&
+                    e.CodeEtagereNavigation.Actif &&
+                    e.CodeEtagereNavigation.CodeRayonNavigation.Actif);
+
+            if (!localisationValide)
+            {
+                ModelState.AddModelError(
+                    "Input.CodeEmplacement",
+                    "La localisation sélectionnée est invalide ou inactive.");
+
+                await transaction.RollbackAsync();
+                return Page();
+            }
+
             // Rechercher l'auteur existant ou le créer.
             string nomAuteur = Input.NomAuteur.Trim();
             string? prenomAuteur = Nettoyer(Input.PrenomAuteur);
@@ -201,7 +223,8 @@ public class CreateModel : PageModel
                     NomAuteur = nomAuteur,
                     PrenomAuteur = prenomAuteur,
                     DatesAuteur = Nettoyer(Input.DatesAuteur),
-                    NoticeBiographique = Nettoyer(Input.NoticeBiographique)
+                    NoticeBiographique =
+                        Nettoyer(Input.NoticeBiographique)
                 };
 
                 _context.Auteurs.Add(auteur);
@@ -237,31 +260,32 @@ public class CreateModel : PageModel
 
             _context.Documents.Add(document);
 
-            // Enregistrer pour obtenir le code du document.
+            // Enregistrer la notice et obtenir son identifiant.
             await _context.SaveChangesAsync();
 
-            // Récupérer le compte utilisateur connecté.
-            int? codeCompte = null;
-
-            string? identifiantCompte =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (int.TryParse(identifiantCompte, out int compte))
-                codeCompte = compte;
-
             // Créer le premier exemplaire physique.
+            // Le trigger PostgreSQL génère le numéro d'inventaire.
             var exemplaire = new Exemplaire
             {
                 CodeDocument = document.CodeDocument,
                 CodeEmplacement = Input.CodeEmplacement,
                 Cote = Input.Cote.Trim(),
-                NumeroInventaire = numeroInventaire,
+
+                // Valeur provisoire remplacée par PostgreSQL.
+                NumeroInventaire = "AUTO",
+
                 DeviseValeur = "CDF",
                 EtatDocument = "BON",
                 StatutExemplaire = "DISPONIBLE",
                 DateCreation = DateTime.Now,
                 EncodePar = codeCompte
             };
+
+            // Affecter la session à l'exemplaire
+            // sans modifier la classe générée Exemplaire.
+            _context.Entry(exemplaire)
+                .Property<long?>("CodeSessionEnregistrement")
+                .CurrentValue = codeSession;
 
             _context.Exemplaires.Add(exemplaire);
 
@@ -270,19 +294,21 @@ public class CreateModel : PageModel
             await transaction.CommitAsync();
 
             TempData["Succes"] =
-                $"Le document « {document.Titre} », son auteur et son exemplaire ont été enregistrés. " +
-                $"Cote : {exemplaire.Cote} ; inventaire : {exemplaire.NumeroInventaire}.";
+                $"Le document « {document.Titre} », son auteur et son " +
+                $"exemplaire ont été enregistrés. " +
+                $"Cote : {exemplaire.Cote} ; " +
+                $"inventaire : {exemplaire.NumeroInventaire}.";
 
             return RedirectToPage("./Index");
         }
-        catch
+        catch (Exception)
         {
             await transaction.RollbackAsync();
 
             ModelState.AddModelError(
                 string.Empty,
-                "L'enregistrement a échoué. Aucune création partielle n'a été conservée. " +
-                "Vérifiez les données saisies et réessayez.");
+                "L'enregistrement a échoué. Aucune création partielle " +
+                "n'a été conservée. Vérifiez les données et réessayez.");
 
             await ChargerListesAsync();
 
