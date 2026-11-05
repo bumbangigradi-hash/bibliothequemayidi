@@ -1,0 +1,453 @@
+﻿@page
+@model bibliotheque_mayidi.Pages.Emprunts.ImprimerBordereauModel
+
+@{
+    Layout = null;
+
+    var lecteur = Model.Bordereau.CodeLecteurNavigation;
+    var compteLecteur = lecteur.CodeCompteNavigation;
+
+    var nomLecteur = string.Join(" ",
+        new[]
+        {
+            compteLecteur.NomUtilisateur,
+            compteLecteur.Postnom,
+            compteLecteur.Prenom
+        }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+    if (string.IsNullOrWhiteSpace(nomLecteur))
+    {
+        nomLecteur = "Nom non renseigné";
+    }
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Bordereau @Model.Bordereau.NumeroBordereau</title>
+
+    <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 20px;
+                background: #e9ecef;
+                color: #20252b;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 11px;
+            }
+
+            .actions {
+                max-width: 148mm;
+                margin: 0 auto 15px;
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+            }
+
+                .actions button,
+                .actions a {
+                    padding: 10px 16px;
+                    border: 0;
+                    border-radius: 5px;
+                    background: #17365d;
+                    color: white;
+                    text-decoration: none;
+                    cursor: pointer;
+                    font-size: 13px;
+                }
+
+                .actions a {
+                    background: #6c757d;
+                }
+
+            .page {
+                width: 148mm;
+                min-height: 210mm;
+                margin: 0 auto 20px;
+                padding: 9mm;
+                background: white;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                border: 1px solid #ddd;
+            }
+
+            .institution {
+                text-align: center;
+                border-bottom: 2px solid #17365d;
+                padding-bottom: 7px;
+            }
+
+                .institution h1 {
+                    font-size: 16px;
+                    margin: 0 0 3px;
+                    color: #17365d;
+                    letter-spacing: .5px;
+                }
+
+                .institution h2 {
+                    font-size: 12px;
+                    margin: 0 0 4px;
+                }
+
+                .institution p {
+                    margin: 0;
+                    font-size: 9px;
+                    letter-spacing: 1px;
+                }
+
+            .document-title {
+                text-align: center;
+                margin: 10px 0;
+            }
+
+                .document-title h3 {
+                    margin: 0 0 4px;
+                    font-size: 17px;
+                    color: #17365d;
+                    letter-spacing: 1px;
+                }
+
+                .document-title strong {
+                    font-size: 11px;
+                }
+
+            .reference {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 10px;
+                padding: 7px;
+                background: #f1f4f8;
+                border: 1px solid #d6dce5;
+                font-size: 10px;
+            }
+
+            .section-title {
+                margin: 8px 0 5px;
+                padding: 5px 7px;
+                background: #17365d;
+                color: white;
+                font-weight: bold;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+
+            .reader-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 7px 12px;
+                padding: 2px 4px 7px;
+            }
+
+            .field {
+                border-bottom: 1px dotted #888;
+                padding: 4px 0;
+                min-height: 22px;
+            }
+
+                .field strong {
+                    color: #343a40;
+                }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 3px;
+                font-size: 9px;
+            }
+
+            th, td {
+                border: 1px solid #aeb7c2;
+                padding: 6px 5px;
+                text-align: left;
+                vertical-align: middle;
+            }
+
+            th {
+                background: #e9edf3;
+                color: #17365d;
+                font-weight: bold;
+            }
+
+            .col-numero {
+                width: 7%;
+                text-align: center;
+            }
+
+            .col-cote {
+                width: 22%;
+            }
+
+            .col-echeance {
+                width: 20%;
+            }
+
+            .engagement {
+                margin-top: 10px;
+                padding: 8px;
+                border: 1px solid #cbd2da;
+                background: #fafbfc;
+                font-size: 9px;
+                line-height: 1.5;
+                text-align: justify;
+            }
+
+            .observations {
+                margin-top: 7px;
+                font-size: 9px;
+                min-height: 20px;
+            }
+
+            .signatures {
+                margin-top: auto;
+                padding-top: 12px;
+            }
+
+            .signature-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-top: 8px;
+            }
+
+            .signature {
+                min-height: 75px;
+                border: 1px solid #aeb7c2;
+                padding: 7px;
+                display: flex;
+                flex-direction: column;
+            }
+
+                .signature strong {
+                    font-size: 9px;
+                    color: #17365d;
+                }
+
+                .signature small {
+                    margin-top: 3px;
+                    font-size: 8px;
+                    color: #555;
+                }
+
+                .signature .line {
+                    margin-top: auto;
+                    border-bottom: 1px solid #555;
+                    height: 32px;
+                }
+
+            .footer {
+                margin-top: 9px;
+                padding-top: 6px;
+                border-top: 1px solid #aaa;
+                text-align: center;
+                font-size: 8px;
+                color: #555;
+            }
+
+            @@page {
+                size: 148mm 210mm;
+                margin: 0;
+            }
+
+            @@media print {
+                body {
+                    padding: 0;
+                    margin: 0;
+                    background: white;
+                }
+
+                .actions {
+                    display: none !important;
+                }
+
+                .page {
+                    width: 148mm;
+                    height: 210mm;
+                    min-height: 210mm;
+                    margin: 0;
+                    padding: 9mm;
+                    border: none;
+                    page-break-after: always;
+                    break-after: page;
+                    overflow: hidden;
+                }
+
+                    .page:last-child {
+                        page-break-after: auto;
+                        break-after: auto;
+                    }
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="actions">
+        <a href="/Emprunts/Index">Retour aux emprunts</a>
+
+        <button type="button" onclick="window.print()">
+            Imprimer les deux exemplaires
+        </button>
+    </div>
+
+    @foreach (var mention in new[]
+    {
+        "EXEMPLAIRE DU LECTEUR",
+        "EXEMPLAIRE DE LA BIBLIOTHÈQUE"
+    })
+    {
+        <div class="page">
+
+            <div class="institution">
+                <h1>GRAND SÉMINAIRE DE MAYIDI</h1>
+                <h2>SAINT ROBERT BELLARMIN</h2>
+                <p>BIBLIOTHÈQUE</p>
+            </div>
+
+            <div class="document-title">
+                <h3>BORDEREAU DE PRÊT</h3>
+                <strong>@mention</strong>
+            </div>
+
+            <div class="reference">
+                <span>
+                    <strong>N° :</strong>
+                    @Model.Bordereau.NumeroBordereau
+                </span>
+
+                <span>
+                    <strong>Date :</strong>
+                    @Model.Bordereau.DatePret.ToString("dd/MM/yyyy")
+                </span>
+            </div>
+
+            <div class="section-title">
+                I. Identification du lecteur
+            </div>
+
+            <div class="reader-info">
+                <div class="field">
+                    <strong>Nom complet :</strong> @nomLecteur
+                </div>
+
+                <div class="field">
+                    <strong>N° lecteur :</strong> @lecteur.NumeroLecteur
+                </div>
+
+                <div class="field">
+                    <strong>Matricule :</strong>
+                    @(lecteur.MatriculeSeminaire ?? "—")
+                </div>
+
+                <div class="field">
+                    <strong>Date du prêt :</strong>
+                    @Model.Bordereau.DatePret.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+            <div class="section-title">
+                II. Ouvrages empruntés
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-numero">N°</th>
+                        <th>Titre de l'ouvrage</th>
+                        <th class="col-cote">Cote</th>
+                        <th class="col-echeance">Échéance</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Lignes.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4">Aucun ouvrage.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @for (int i = 0; i < Model.Lignes.Count; i++)
+                        {
+                            var ligne = Model.Lignes[i];
+
+                            <tr>
+                                <td class="col-numero">@(i + 1)</td>
+                                <td>
+                                    @ligne.CodeExemplaireNavigation.CodeDocumentNavigation.Titre
+                                </td>
+                                <td>
+                                    @ligne.CodeExemplaireNavigation.Cote
+                                </td>
+                                <td>
+                                    @ligne.DateEcheance.ToString("dd/MM/yyyy")
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <div class="engagement">
+                Le lecteur reconnaît avoir reçu les ouvrages mentionnés
+                ci-dessus en bon état. Il s'engage à les conserver avec soin,
+                à respecter les délais de prêt et à les restituer à la
+                bibliothèque à la date d'échéance indiquée. Tout retard,
+                perte ou détérioration sera traité conformément au règlement
+                de la bibliothèque.
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Bordereau.Observations))
+            {
+                <div class="observations">
+                    <strong>Observations :</strong>
+                    @Model.Bordereau.Observations
+                </div>
+            }
+
+            <div class="signatures">
+
+                <div class="section-title">
+                    III. Signatures et validation
+                </div>
+
+                <div class="signature-grid">
+
+                    <div class="signature">
+                        <strong>LE LECTEUR</strong>
+                        <small>Nom : @nomLecteur</small>
+                        <small>Signature :</small>
+                        <div class="line"></div>
+                    </div>
+
+                    <div class="signature">
+                        <strong>LE BIBLIOTHÉCAIRE</strong>
+                        <small>Nom : @Model.NomBibliothecaire</small>
+                        <small>Signature et validation de la livraison :</small>
+                        <div class="line"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="footer">
+                Bibliothèque du Grand Séminaire de Mayidi —
+                Saint Robert Bellarmin<br />
+                Document officiel de suivi des prêts
+            </div>
+
+        </div>
+    }
+
+</body>
+</html>

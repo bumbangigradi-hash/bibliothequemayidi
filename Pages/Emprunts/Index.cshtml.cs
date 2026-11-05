@@ -101,7 +101,6 @@ public class IndexModel : PageModel
 
         q = q.Trim();
 
-        // Recherche des documents associés à une cote saisie.
         var codesDocumentsParCote = await _context.Exemplaires
             .AsNoTracking()
             .Where(e => e.Cote.Contains(q))
@@ -109,7 +108,6 @@ public class IndexModel : PageModel
             .Distinct()
             .ToListAsync();
 
-        // Recherche par titre, nom/prénom d'auteur ou cote.
         var documents = await _context.Documents
             .AsNoTracking()
             .Include(d => d.CodeTypeDocumentNavigation)
@@ -120,12 +118,10 @@ public class IndexModel : PageModel
                 d.CodeTypeDocumentNavigation.EmpruntAutorise &&
                 (
                     d.Titre.Contains(q) ||
-
                     d.DocumentsAuteurs.Any(da =>
                         da.CodeAuteurNavigation.NomAuteur.Contains(q) ||
                         (da.CodeAuteurNavigation.PrenomAuteur != null &&
                          da.CodeAuteurNavigation.PrenomAuteur.Contains(q))) ||
-
                     codesDocumentsParCote.Contains(d.CodeDocument)
                 ))
             .OrderBy(d => d.Titre)
@@ -136,7 +132,6 @@ public class IndexModel : PageModel
             .Select(d => d.CodeDocument)
             .ToList();
 
-        // Seuls les exemplaires disponibles sont proposés au prêt.
         var exemplaires = await _context.Exemplaires
             .AsNoTracking()
             .Where(e =>
@@ -566,10 +561,10 @@ public class IndexModel : PageModel
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return RedirectToPage("/Emprunts/Index", new
-            {
-                message = $"Bordereau {bordereau.NumeroBordereau} enregistré avec {exemplaires.Count} ouvrage(s)."
-            });
+            // OUVERTURE AUTOMATIQUE DU BORDEREAU A5
+            return RedirectToPage(
+                "/Emprunts/ImprimerBordereau",
+                new { id = bordereau.CodeBordereauPret });
         }
         catch (Exception)
         {
