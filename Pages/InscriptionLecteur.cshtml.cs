@@ -16,44 +16,54 @@ public class InscriptionLecteurModel : PageModel
 {
     private readonly BibliothequeScaffoldContext _context;
     private readonly IPasswordHasher<ComptesUtilisateur> _hasher;
+    private readonly ILogger<InscriptionLecteurModel> _logger;
 
     public InscriptionLecteurModel(
         BibliothequeScaffoldContext context,
-        IPasswordHasher<ComptesUtilisateur> hasher)
+        IPasswordHasher<ComptesUtilisateur> hasher,
+        ILogger<InscriptionLecteurModel> logger)
     {
         _context = context;
         _hasher = hasher;
+        _logger = logger;
     }
 
     [BindProperty]
     [Required(ErrorMessage = "Le nom est obligatoire.")]
+    [StringLength(100)]
     public string Nom { get; set; } = "";
 
     [BindProperty]
+    [StringLength(100)]
     public string? Postnom { get; set; }
 
     [BindProperty]
+    [StringLength(100)]
     public string? Prenom { get; set; }
 
     [BindProperty]
+    [StringLength(60)]
     public string? MatriculeSeminaire { get; set; }
 
     [BindProperty]
     [Required(ErrorMessage = "La catégorie est obligatoire.")]
+    [StringLength(40)]
     public string CategorieLecteur { get; set; } = "";
 
     [BindProperty]
+    [StringLength(180)]
     public string? InstitutionOrigine { get; set; }
 
     [BindProperty]
     [Required(ErrorMessage = "L'identifiant est obligatoire.")]
-    [StringLength(80, MinimumLength = 3)]
+    [StringLength(100, MinimumLength = 3,
+        ErrorMessage = "L'identifiant doit contenir entre 3 et 100 caractères.")]
     public string Identifiant { get; set; } = "";
 
     [BindProperty]
     [Required(ErrorMessage = "Le mot de passe est obligatoire.")]
-    [StringLength(100, MinimumLength = 12,
-        ErrorMessage = "Le mot de passe doit contenir au moins 12 caractères.")]
+    [StringLength(100, MinimumLength = 8,
+        ErrorMessage = "Le mot de passe doit contenir au moins 8 caractères.")]
     public string MotDePasse { get; set; } = "";
 
     [BindProperty]
@@ -70,16 +80,35 @@ public class InscriptionLecteurModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        Nom = Nom.Trim();
-        Identifiant = Identifiant.Trim();
-        CategorieLecteur = CategorieLecteur.Trim();
-
-        MatriculeSeminaire = string.IsNullOrWhiteSpace(MatriculeSeminaire)
-            ? null
-            : MatriculeSeminaire.Trim();
+        Nom = Nom?.Trim() ?? "";
+        Postnom = Nettoyer(Postnom);
+        Prenom = Nettoyer(Prenom);
+        Identifiant = Identifiant?.Trim() ?? "";
+        CategorieLecteur = CategorieLecteur?.Trim() ?? "";
+        MatriculeSeminaire = Nettoyer(MatriculeSeminaire);
+        InstitutionOrigine = Nettoyer(InstitutionOrigine);
 
         if (!ModelState.IsValid)
             return Page();
+
+        string[] categoriesAutorisees =
+        {
+            "SEMINARISTE",
+            "FORMATEUR",
+            "PERSONNEL",
+            "EXTERNE"
+        };
+
+        if (!categoriesAutorisees.Contains(
+                CategorieLecteur,
+                StringComparer.Ordinal))
+        {
+            ModelState.AddModelError(
+                nameof(CategorieLecteur),
+                "Veuillez sélectionner une catégorie valide.");
+
+            return Page();
+        }
 
         if (await _context.ComptesUtilisateurs
             .AnyAsync(c => c.Identifiant == Identifiant))
@@ -87,6 +116,7 @@ public class InscriptionLecteurModel : PageModel
             ModelState.AddModelError(
                 nameof(Identifiant),
                 "Cet identifiant est déjà utilisé.");
+
             return Page();
         }
 
@@ -97,10 +127,11 @@ public class InscriptionLecteurModel : PageModel
             ModelState.AddModelError(
                 nameof(MatriculeSeminaire),
                 "Ce matricule est déjà enregistré.");
+
             return Page();
         }
 
-        var roleExiste = await _context.Roles
+        bool roleExiste = await _context.Roles
             .AnyAsync(r => r.CodeRole == "LECTEUR");
 
         if (!roleExiste)
@@ -108,6 +139,7 @@ public class InscriptionLecteurModel : PageModel
             ModelState.AddModelError(
                 string.Empty,
                 "Le rôle LECTEUR n'existe pas dans la base de données.");
+
             return Page();
         }
 
@@ -120,15 +152,15 @@ public class InscriptionLecteurModel : PageModel
             {
                 CodeRole = "LECTEUR",
                 NomUtilisateur = Nom,
-                Postnom = string.IsNullOrWhiteSpace(Postnom)
-                    ? null : Postnom.Trim(),
-                Prenom = string.IsNullOrWhiteSpace(Prenom)
-                    ? null : Prenom.Trim(),
+                Postnom = Postnom,
+                Prenom = Prenom,
                 Identifiant = Identifiant,
                 MotDePasseHash = "",
                 StatutCompte = "EN_ATTENTE",
-                Actif = true,
-                DateCreation = DateTime.UtcNow,
+                Actif = false,
+                DateCreation = DateTime.SpecifyKind(
+                    DateTime.Now,
+                    DateTimeKind.Unspecified),
                 NombreEchecsConnexion = 0
             };
 
@@ -136,27 +168,35 @@ public class InscriptionLecteurModel : PageModel
                 _hasher.HashPassword(compte, MotDePasse);
 
             _context.ComptesUtilisateurs.Add(compte);
+
             await _context.SaveChangesAsync();
 
             var lecteur = new Lecteur
             {
                 CodeCompte = compte.CodeCompte,
+
                 NumeroLecteur = await GenererNumeroLecteurAsync(),
+
                 MatriculeSeminaire = MatriculeSeminaire,
+
                 CategorieLecteur = CategorieLecteur,
-                InstitutionOrigine = string.IsNullOrWhiteSpace(InstitutionOrigine)
-                    ? null : InstitutionOrigine.Trim(),
+
+                InstitutionOrigine = InstitutionOrigine,
+
                 DateInscription = DateOnly.FromDateTime(DateTime.Today),
+
                 StatutLecteur = "EN_ATTENTE"
             };
 
             _context.Lecteurs.Add(lecteur);
+
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
-            Message = "Votre demande d'inscription a été enregistrée. " +
-                      "Vous pourrez vous connecter après validation par l'administration.";
+            Message =
+                "Votre demande d'inscription a été enregistrée. " +
+                "Vous pourrez vous connecter après validation par l'administration.";
 
             ModelState.Clear();
 
@@ -172,22 +212,48 @@ public class InscriptionLecteurModel : PageModel
 
             return Page();
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex)
         {
             await transaction.RollbackAsync();
+
+            _logger.LogError(
+                ex,
+                "Erreur PostgreSQL lors de l'inscription du lecteur. Détail : {Detail}",
+                ex.InnerException?.Message ?? ex.Message);
 
             ModelState.AddModelError(
                 string.Empty,
                 "L'inscription n'a pas pu être enregistrée. " +
-                "Vérifiez l'identifiant et le matricule, puis réessayez.");
+                "Une erreur de base de données est survenue. Réessayez.");
+
+            return Page();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+
+            _logger.LogError(
+                ex,
+                "Erreur inattendue lors de l'inscription publique du lecteur.");
+
+            ModelState.AddModelError(
+                string.Empty,
+                "Une erreur inattendue est survenue. Veuillez réessayer.");
 
             return Page();
         }
     }
 
+    private static string? Nettoyer(string? valeur)
+    {
+        return string.IsNullOrWhiteSpace(valeur)
+            ? null
+            : valeur.Trim();
+    }
+
     private async Task<string> GenererNumeroLecteurAsync()
     {
-        for (int tentative = 0; tentative < 10; tentative++)
+        for (int tentative = 0; tentative < 20; tentative++)
         {
             string numero =
                 $"MAY-{DateTime.UtcNow:yyyyMMdd}-{RandomNumberGenerator.GetInt32(0, 1_000_000):D6}";

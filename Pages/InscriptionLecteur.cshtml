@@ -90,6 +90,10 @@
                 cursor: pointer;
             }
 
+                button:hover {
+                    background: #166534;
+                }
+
             .message {
                 padding: 14px;
                 margin-bottom: 20px;
@@ -136,7 +140,9 @@
         {
             <div class="message" role="status">
                 @Model.Message
-                <p><a href="/Connexion">Aller à la connexion</a></p>
+                <p>
+                    <a href="/Connexion">Aller à la connexion</a>
+                </p>
             </div>
         }
         else
@@ -157,11 +163,13 @@
                     <div class="champ">
                         <label asp-for="Postnom">Postnom</label>
                         <input asp-for="Postnom" />
+                        <span asp-validation-for="Postnom" class="erreurs"></span>
                     </div>
 
                     <div class="champ">
                         <label asp-for="Prenom">Prénom</label>
                         <input asp-for="Prenom" autocomplete="given-name" />
+                        <span asp-validation-for="Prenom" class="erreurs"></span>
                     </div>
 
                     <div class="champ">
@@ -169,7 +177,7 @@
                             Matricule du séminaire (facultatif)
                         </label>
 
-                        <input asp-for="MatriculeSeminaire" />
+                        <input asp-for="MatriculeSeminaire" maxlength="60" />
 
                         <small class="aide">
                             Vous pouvez laisser ce champ vide si vous ne possédez pas de matricule.
@@ -200,34 +208,54 @@
                         <label asp-for="InstitutionOrigine">
                             Institution d'origine
                         </label>
-                        <input asp-for="InstitutionOrigine" />
+                        <input asp-for="InstitutionOrigine" maxlength="180" />
+                        <span asp-validation-for="InstitutionOrigine"
+                              class="erreurs"></span>
                     </div>
 
-                    <div class="champ">
+                    <div class="champ largeur">
                         <label asp-for="Identifiant">
                             Identifiant souhaité *
                         </label>
-                        <input asp-for="Identifiant" autocomplete="username" />
+
+                        <input asp-for="Identifiant"
+                               autocomplete="username"
+                               maxlength="100" />
+
+                        <small class="aide">
+                            Choisissez un identifiant personnel pour vous connecter.
+                        </small>
+
                         <span asp-validation-for="Identifiant"
                               class="erreurs"></span>
                     </div>
 
                     <div class="champ">
                         <label asp-for="MotDePasse">Mot de passe *</label>
+
                         <input asp-for="MotDePasse"
                                type="password"
+                               minlength="8"
+                               maxlength="100"
                                autocomplete="new-password" />
+
+                        <small class="aide">
+                            8 caractères minimum.
+                        </small>
+
                         <span asp-validation-for="MotDePasse"
                               class="erreurs"></span>
                     </div>
 
-                    <div class="champ largeur">
+                    <div class="champ">
                         <label asp-for="ConfirmationMotDePasse">
                             Confirmer le mot de passe *
                         </label>
 
                         <input asp-for="ConfirmationMotDePasse"
                                type="password"
+                               minlength="8"
+                               maxlength="100"
                                autocomplete="new-password" />
 
                         <span asp-validation-for="ConfirmationMotDePasse"
@@ -248,5 +276,7 @@
             <a href="/Connexion">Déjà inscrit ? Se connecter</a>
         </p>
     </main>
+
+    <partial name="_ValidationScriptsPartial" />
 </body>
 </html>
