@@ -58,8 +58,7 @@ public class CreateModel : PageModel
         [StringLength(50)]
         public string? Langue { get; set; }
 
-        [Range(1, 100000,
-            ErrorMessage = "Le nombre de pages doit être positif.")]
+        [Range(1, 100000, ErrorMessage = "Le nombre de pages doit être positif.")]
         public int? NombrePages { get; set; }
 
         public string? Resume { get; set; }
@@ -82,12 +81,10 @@ public class CreateModel : PageModel
         [Required(ErrorMessage = "Sélectionnez un rayon.")]
         public string CodeRayon { get; set; } = string.Empty;
 
-        [Range(1, int.MaxValue,
-            ErrorMessage = "Sélectionnez une étagère.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une étagère.")]
         public int CodeEtagere { get; set; }
 
-        [Range(1, int.MaxValue,
-            ErrorMessage = "Sélectionnez une place.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Sélectionnez une place.")]
         public int CodeEmplacement { get; set; }
 
         [Required(ErrorMessage = "La cote est obligatoire.")]
@@ -95,12 +92,13 @@ public class CreateModel : PageModel
         public string Cote { get; set; } = string.Empty;
     }
 
+    // AFFICHAGE INITIAL
     public async Task OnGetAsync()
     {
         await ChargerListesAsync();
     }
 
-    // Chargement des étagères du rayon choisi.
+    // CHARGEMENT DES ÉTAGÈRES D'UN RAYON (AJAX)
     public async Task<JsonResult> OnGetEtageresAsync(string codeRayon)
     {
         if (string.IsNullOrWhiteSpace(codeRayon))
@@ -123,7 +121,7 @@ public class CreateModel : PageModel
         return new JsonResult(etageres);
     }
 
-    // Chargement des places de l'étagère choisie.
+    // CHARGEMENT DES PLACES D'UNE ÉTAGÈRE (AJAX)
     public async Task<JsonResult> OnGetEmplacementsAsync(int codeEtagere)
     {
         if (codeEtagere <= 0)
@@ -139,22 +137,18 @@ public class CreateModel : PageModel
             .OrderBy(e => e.NumeroPlace)
             .Select(e => new
             {
-                e.CodeEmplacement,
-                e.NumeroPlace
+                value = e.CodeEmplacement,
+                label = Convert.ToString(e.NumeroPlace)
             })
             .ToListAsync();
 
-        return new JsonResult(emplacements.Select(e => new
-        {
-            value = e.CodeEmplacement,
-            label = Convert.ToString(e.NumeroPlace)
-        }));
+        return new JsonResult(emplacements);
     }
 
+    // ENREGISTREMENT DU DOCUMENT
     public async Task<IActionResult> OnPostAsync()
     {
-        // Recharge uniquement les listes nécessaires à l'affichage.
-        await ChargerListesAsync(chargerLocalisationSelectionnee: true);
+        await ChargerListesAsync();
 
         if (!ModelState.IsValid)
             return Page();
@@ -250,6 +244,7 @@ public class CreateModel : PageModel
                 return Page();
             }
 
+            // RECHERCHER OU CRÉER L'AUTEUR
             string nomAuteur = Input.NomAuteur.Trim();
             string? prenomAuteur = Nettoyer(Input.PrenomAuteur);
 
@@ -265,13 +260,13 @@ public class CreateModel : PageModel
                     NomAuteur = nomAuteur,
                     PrenomAuteur = prenomAuteur,
                     DatesAuteur = Nettoyer(Input.DatesAuteur),
-                    NoticeBiographique =
-                        Nettoyer(Input.NoticeBiographique)
+                    NoticeBiographique = Nettoyer(Input.NoticeBiographique)
                 };
 
                 _context.Auteurs.Add(auteur);
             }
 
+            // CRÉER LA NOTICE BIBLIOGRAPHIQUE
             var document = new Document
             {
                 Titre = Input.Titre.Trim(),
@@ -302,6 +297,7 @@ public class CreateModel : PageModel
             _context.Documents.Add(document);
             await _context.SaveChangesAsync();
 
+            // CRÉER LE PREMIER EXEMPLAIRE
             var exemplaire = new Exemplaire
             {
                 CodeDocument = document.CodeDocument,
@@ -341,14 +337,12 @@ public class CreateModel : PageModel
                 "L'enregistrement a échoué. Aucune création partielle " +
                 "n'a été conservée. Vérifiez les données et réessayez.");
 
-            await ChargerListesAsync(chargerLocalisationSelectionnee: true);
-
             return Page();
         }
     }
 
-    private async Task ChargerListesAsync(
-        bool chargerLocalisationSelectionnee = false)
+    // CHARGEMENT DES LISTES POUR LE FORMULAIRE
+    private async Task ChargerListesAsync()
     {
         Types = await _context.TypesDocuments
             .AsNoTracking()
@@ -371,38 +365,27 @@ public class CreateModel : PageModel
             .OrderBy(r => r.NomRayon)
             .ToListAsync();
 
-        Etageres = new List<Etagere>();
-        Emplacements = new List<Emplacement>();
+        // IMPORTANT : charger toutes les étagères actives
+        Etageres = await _context.Etageres
+            .AsNoTracking()
+            .Where(e =>
+                e.Actif &&
+                e.CodeRayonNavigation.Actif)
+            .OrderBy(e => e.NumeroEtagereRoman)
+            .ToListAsync();
 
-        if (!chargerLocalisationSelectionnee)
-            return;
-
-        if (!string.IsNullOrWhiteSpace(Input.CodeRayon))
-        {
-            Etageres = await _context.Etageres
-                .AsNoTracking()
-                .Where(e =>
-                    e.Actif &&
-                    e.CodeRayon == Input.CodeRayon &&
-                    e.CodeRayonNavigation.Actif)
-                .OrderBy(e => e.NumeroEtagereRoman)
-                .ToListAsync();
-        }
-
-        if (Input.CodeEtagere > 0)
-        {
-            Emplacements = await _context.Emplacements
-                .AsNoTracking()
-                .Where(e =>
-                    e.Actif &&
-                    e.CodeEtagere == Input.CodeEtagere &&
-                    e.CodeEtagereNavigation.Actif &&
-                    e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
-                .OrderBy(e => e.NumeroPlace)
-                .ToListAsync();
-        }
+        // IMPORTANT : charger toutes les places actives
+        Emplacements = await _context.Emplacements
+            .AsNoTracking()
+            .Where(e =>
+                e.Actif &&
+                e.CodeEtagereNavigation.Actif &&
+                e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
+            .OrderBy(e => e.NumeroPlace)
+            .ToListAsync();
     }
 
+    // NETTOYAGE DES CHAMPS TEXTE
     private static string? Nettoyer(string? valeur)
     {
         return string.IsNullOrWhiteSpace(valeur)
