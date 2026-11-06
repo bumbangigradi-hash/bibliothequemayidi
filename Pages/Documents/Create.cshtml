@@ -1,4 +1,5 @@
-﻿@page
+﻿
+@page
 @model bibliotheque_mayidi.Pages.Documents.CreateModel
 
 @{
@@ -26,17 +27,17 @@
         box-shadow: 0 3px 12px rgba(0,0,0,.05);
     }
 
-        .form-section .card-header {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 17px 20px;
-            font-weight: 700;
-            color: #14532d;
-        }
+    .form-section .card-header {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 17px 20px;
+        font-weight: 700;
+        color: #14532d;
+    }
 
-        .form-section .card-body {
-            padding: 22px;
-        }
+    .form-section .card-body {
+        padding: 22px;
+    }
 
     .form-label {
         font-weight: 600;
@@ -48,10 +49,10 @@
         padding: 10px 12px;
     }
 
-        .form-control:focus, .form-select:focus {
-            border-color: #166534;
-            box-shadow: 0 0 0 .2rem rgba(22,101,52,.12);
-        }
+    .form-control:focus, .form-select:focus {
+        border-color: #166534;
+        box-shadow: 0 0 0 .2rem rgba(22,101,52,.12);
+    }
 
     .btn-bibliotheque {
         background: #14532d;
@@ -59,13 +60,39 @@
         border: none;
     }
 
-        .btn-bibliotheque:hover {
-            background: #166534;
-            color: white;
-        }
+    .btn-bibliotheque:hover {
+        background: #166534;
+        color: white;
+    }
+
+    .btn-enregistrer {
+        background: #14532d;
+        color: white;
+        border: none;
+        border-radius: 9px;
+        padding: 13px 35px;
+        font-size: 17px;
+        font-weight: 700;
+        transition: .2s;
+    }
+
+    .btn-enregistrer:hover {
+        background: #166534;
+        color: white;
+        transform: translateY(-1px);
+    }
 
     .obligatoire {
         color: #dc2626;
+    }
+
+    .actions-enregistrement {
+        background: white;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 40px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.07);
+        border: 1px solid #e5e7eb;
     }
 </style>
 
@@ -90,6 +117,7 @@
 
     <!-- NAVIGATION -->
     <div class="d-flex flex-wrap gap-2 mb-4">
+
         <a asp-page="/Bibliothecaire/Index"
            class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i>
@@ -101,6 +129,7 @@
             <i class="bi bi-list-ul"></i>
             Liste des documents
         </a>
+
     </div>
 
     <!-- MESSAGES -->
@@ -109,6 +138,7 @@
         <div class="alert alert-success alert-dismissible fade show">
             <i class="bi bi-check-circle-fill me-2"></i>
             @succes
+
             <button type="button" class="btn-close"
                     data-bs-dismiss="alert"></button>
         </div>
@@ -122,20 +152,25 @@
 
         <!-- 1. NOTICE BIBLIOGRAPHIQUE -->
         <div class="card form-section">
+
             <div class="card-header">
                 <i class="bi bi-book-half me-2"></i>
                 1. Informations bibliographiques
             </div>
 
             <div class="card-body">
+
                 <div class="row g-3">
 
                     <div class="col-md-8">
                         <label asp-for="Input.Titre" class="form-label">
                             Titre <span class="obligatoire">*</span>
                         </label>
-                        <input asp-for="Input.Titre" class="form-control"
+
+                        <input asp-for="Input.Titre"
+                               class="form-control"
                                placeholder="Titre complet du document" />
+
                         <span asp-validation-for="Input.Titre"
                               class="text-danger"></span>
                     </div>
@@ -144,8 +179,10 @@
                         <label asp-for="Input.SousTitre" class="form-label">
                             Sous-titre
                         </label>
+
                         <input asp-for="Input.SousTitre"
                                class="form-control" />
+
                         <span asp-validation-for="Input.SousTitre"
                               class="text-danger"></span>
                     </div>
@@ -155,9 +192,11 @@
                                class="form-label">
                             Type de document <span class="obligatoire">*</span>
                         </label>
+
                         <select asp-for="Input.CodeTypeDocument"
                                 class="form-select">
                             <option value="">-- Sélectionner un type --</option>
+
                             @foreach (var type in Model.Types)
                             {
                                 <option value="@type.CodeTypeDocument">
@@ -165,6 +204,7 @@
                                 </option>
                             }
                         </select>
+
                         <span asp-validation-for="Input.CodeTypeDocument"
                               class="text-danger"></span>
                     </div>
@@ -174,9 +214,11 @@
                                class="form-label">
                             Collection
                         </label>
+
                         <select asp-for="Input.CodeCollection"
                                 class="form-select">
                             <option value="">-- Aucune collection --</option>
+
                             @foreach (var collection in Model.Collections)
                             {
                                 <option value="@collection.CodeCollection">
@@ -184,6 +226,7 @@
                                 </option>
                             }
                         </select>
+
                         <span asp-validation-for="Input.CodeCollection"
                               class="text-danger"></span>
                     </div>
@@ -193,9 +236,11 @@
                                class="form-label">
                             Éditeur
                         </label>
+
                         <select asp-for="Input.CodeEditeur"
                                 class="form-select">
                             <option value="">-- Sélectionner un éditeur --</option>
+
                             @foreach (var editeur in Model.Editeurs)
                             {
                                 <option value="@editeur.CodeEditeur">
@@ -203,6 +248,7 @@
                                 </option>
                             }
                         </select>
+
                         <span asp-validation-for="Input.CodeEditeur"
                               class="text-danger"></span>
                     </div>
@@ -211,9 +257,11 @@
                         <label asp-for="Input.IsbnIssn" class="form-label">
                             ISBN / ISSN
                         </label>
+
                         <input asp-for="Input.IsbnIssn"
                                class="form-control"
                                placeholder="ISBN ou ISSN" />
+
                         <span asp-validation-for="Input.IsbnIssn"
                               class="text-danger"></span>
                     </div>
@@ -222,7 +270,10 @@
                         <label asp-for="Input.Edition" class="form-label">
                             Édition
                         </label>
-                        <input asp-for="Input.Edition" class="form-control" />
+
+                        <input asp-for="Input.Edition"
+                               class="form-control" />
+
                         <span asp-validation-for="Input.Edition"
                               class="text-danger"></span>
                     </div>
@@ -232,8 +283,10 @@
                                class="form-label">
                             Lieu de publication
                         </label>
+
                         <input asp-for="Input.LieuPublication"
                                class="form-control" />
+
                         <span asp-validation-for="Input.LieuPublication"
                               class="text-danger"></span>
                     </div>
@@ -243,9 +296,13 @@
                                class="form-label">
                             Année de publication
                         </label>
+
                         <input asp-for="Input.AnneePublication"
-                               type="number" class="form-control"
-                               min="1" max="2100" />
+                               type="number"
+                               class="form-control"
+                               min="1"
+                               max="2100" />
+
                         <span asp-validation-for="Input.AnneePublication"
                               class="text-danger"></span>
                     </div>
@@ -254,9 +311,11 @@
                         <label asp-for="Input.Langue" class="form-label">
                             Langue
                         </label>
+
                         <input asp-for="Input.Langue"
                                class="form-control"
                                placeholder="Ex. : Français, Latin..." />
+
                         <span asp-validation-for="Input.Langue"
                               class="text-danger"></span>
                     </div>
@@ -266,9 +325,12 @@
                                class="form-label">
                             Nombre de pages
                         </label>
+
                         <input asp-for="Input.NombrePages"
-                               type="number" min="1"
+                               type="number"
+                               min="1"
                                class="form-control" />
+
                         <span asp-validation-for="Input.NombrePages"
                               class="text-danger"></span>
                     </div>
@@ -277,9 +339,12 @@
                         <label asp-for="Input.Resume" class="form-label">
                             Résumé / Description
                         </label>
+
                         <textarea asp-for="Input.Resume"
-                                  class="form-control" rows="4"
+                                  class="form-control"
+                                  rows="4"
                                   placeholder="Présentez brièvement le contenu du document..."></textarea>
+
                         <span asp-validation-for="Input.Resume"
                               class="text-danger"></span>
                     </div>
@@ -288,21 +353,26 @@
                         <label asp-for="Input.MotsCles" class="form-label">
                             Mots-clés
                         </label>
+
                         <input asp-for="Input.MotsCles"
                                class="form-control"
                                placeholder="Ex. : théologie, philosophie, Église..." />
+
                         <span asp-validation-for="Input.MotsCles"
                               class="text-danger"></span>
                     </div>
 
                     <div class="col-12">
                         <div class="form-check">
+
                             <input asp-for="Input.EmpruntAutorise"
                                    class="form-check-input" />
+
                             <label asp-for="Input.EmpruntAutorise"
                                    class="form-check-label">
                                 Autoriser l'emprunt de ce document
                             </label>
+
                         </div>
                     </div>
 
@@ -312,20 +382,24 @@
 
         <!-- 2. AUTEUR -->
         <div class="card form-section">
+
             <div class="card-header">
                 <i class="bi bi-person-lines-fill me-2"></i>
                 2. Informations sur l'auteur
             </div>
 
             <div class="card-body">
+
                 <div class="row g-3">
 
                     <div class="col-md-6">
                         <label asp-for="Input.NomAuteur" class="form-label">
                             Nom de l'auteur <span class="obligatoire">*</span>
                         </label>
+
                         <input asp-for="Input.NomAuteur"
                                class="form-control" />
+
                         <span asp-validation-for="Input.NomAuteur"
                               class="text-danger"></span>
                     </div>
@@ -335,8 +409,10 @@
                                class="form-label">
                             Prénom de l'auteur
                         </label>
+
                         <input asp-for="Input.PrenomAuteur"
                                class="form-control" />
+
                         <span asp-validation-for="Input.PrenomAuteur"
                               class="text-danger"></span>
                     </div>
@@ -346,9 +422,11 @@
                                class="form-label">
                             Dates de naissance et de décès
                         </label>
+
                         <input asp-for="Input.DatesAuteur"
                                class="form-control"
                                placeholder="Ex. : 1920-2005" />
+
                         <span asp-validation-for="Input.DatesAuteur"
                               class="text-danger"></span>
                     </div>
@@ -358,9 +436,12 @@
                                class="form-label">
                             Notice biographique
                         </label>
+
                         <textarea asp-for="Input.NoticeBiographique"
-                                  class="form-control" rows="3"
+                                  class="form-control"
+                                  rows="3"
                                   placeholder="Quelques informations sur l'auteur..."></textarea>
+
                         <span asp-validation-for="Input.NoticeBiographique"
                               class="text-danger"></span>
                     </div>
@@ -371,6 +452,7 @@
 
         <!-- 3. PREMIER EXEMPLAIRE -->
         <div class="card form-section">
+
             <div class="card-header">
                 <i class="bi bi-geo-alt me-2"></i>
                 3. Localisation du premier exemplaire physique
@@ -380,6 +462,7 @@
 
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle me-2"></i>
+
                     Le premier exemplaire physique sera automatiquement créé.
                     Son numéro d'inventaire sera attribué par le système et
                     rattaché à votre session d'enregistrement en cours.
@@ -392,16 +475,22 @@
                                class="form-label">
                             Rayon <span class="obligatoire">*</span>
                         </label>
+
                         <select asp-for="Input.CodeRayon"
-                                class="form-select" id="CodeRayon">
+                                class="form-select"
+                                id="CodeRayon">
+
                             <option value="">-- Choisir un rayon --</option>
+
                             @foreach (var rayon in Model.Rayons)
                             {
                                 <option value="@rayon.CodeRayon">
                                     @rayon.NomRayon
                                 </option>
                             }
+
                         </select>
+
                         <span asp-validation-for="Input.CodeRayon"
                               class="text-danger"></span>
                     </div>
@@ -411,9 +500,13 @@
                                class="form-label">
                             Étagère <span class="obligatoire">*</span>
                         </label>
+
                         <select asp-for="Input.CodeEtagere"
-                                class="form-select" id="CodeEtagere">
+                                class="form-select"
+                                id="CodeEtagere">
+
                             <option value="">-- Choisir une étagère --</option>
+
                             @foreach (var etagere in Model.Etageres)
                             {
                                 <option value="@etagere.CodeEtagere"
@@ -421,7 +514,9 @@
                                     @etagere.NumeroEtagereRoman
                                 </option>
                             }
+
                         </select>
+
                         <span asp-validation-for="Input.CodeEtagere"
                               class="text-danger"></span>
                     </div>
@@ -431,9 +526,13 @@
                                class="form-label">
                             Place <span class="obligatoire">*</span>
                         </label>
+
                         <select asp-for="Input.CodeEmplacement"
-                                class="form-select" id="CodeEmplacement">
+                                class="form-select"
+                                id="CodeEmplacement">
+
                             <option value="">-- Choisir une place --</option>
+
                             @foreach (var emplacement in Model.Emplacements)
                             {
                                 <option value="@emplacement.CodeEmplacement"
@@ -441,7 +540,9 @@
                                     @emplacement.NumeroPlace
                                 </option>
                             }
+
                         </select>
+
                         <span asp-validation-for="Input.CodeEmplacement"
                               class="text-danger"></span>
                     </div>
@@ -450,9 +551,11 @@
                         <label asp-for="Input.Cote" class="form-label">
                             Cote <span class="obligatoire">*</span>
                         </label>
+
                         <input asp-for="Input.Cote"
                                class="form-control"
                                placeholder="Ex. : PHILO-X/1" />
+
                         <span asp-validation-for="Input.Cote"
                               class="text-danger"></span>
                     </div>
@@ -461,19 +564,28 @@
             </div>
         </div>
 
-        <!-- ACTIONS -->
-        <div class="d-flex flex-wrap justify-content-between gap-2 mb-5">
+        <!-- 4. ACTIONS D'ENREGISTREMENT -->
+        <div class="actions-enregistrement">
 
-            <a asp-page="/Documents/Index"
-               class="btn btn-outline-secondary">
-                <i class="bi bi-x-circle me-1"></i>
-                Annuler
-            </a>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-            <button type="submit" class="btn btn-bibliotheque btn-lg">
-                <i class="bi bi-save me-2"></i>
-                Enregistrer le document
-            </button>
+                <a asp-page="/Documents/Index"
+                   class="btn btn-outline-secondary btn-lg">
+
+                    <i class="bi bi-x-circle me-2"></i>
+                    Annuler
+
+                </a>
+
+                <button type="submit"
+                        class="btn btn-enregistrer">
+
+                    <i class="bi bi-save me-2"></i>
+                    Enregistrer le document
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -481,21 +593,26 @@
 </div>
 
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+
             const rayon = document.getElementById("CodeRayon");
             const etagere = document.getElementById("CodeEtagere");
             const emplacement = document.getElementById("CodeEmplacement");
 
             function filtrerEtageres() {
+
                 const rayonChoisi = rayon.value;
 
                 Array.from(etagere.options).forEach(option => {
+
                     if (!option.value) return;
 
-                    option.hidden = option.dataset.rayon !== rayonChoisi;
+                    option.hidden =
+                        option.dataset.rayon !== rayonChoisi;
                 });
 
                 if (etagere.selectedOptions[0]?.hidden) {
@@ -506,9 +623,11 @@
             }
 
             function filtrerEmplacements() {
+
                 const etagereChoisie = etagere.value;
 
                 Array.from(emplacement.options).forEach(option => {
+
                     if (!option.value) return;
 
                     option.hidden =
@@ -521,9 +640,11 @@
             }
 
             rayon.addEventListener("change", filtrerEtageres);
+
             etagere.addEventListener("change", filtrerEmplacements);
 
             filtrerEtageres();
+
         });
     </script>
 }
