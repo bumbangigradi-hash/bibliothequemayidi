@@ -79,7 +79,6 @@ public class CreateModel : PageModel
 
         public string? NoticeBiographique { get; set; }
 
-        // Localisation physique
         [Required(ErrorMessage = "Sélectionnez un rayon.")]
         public string CodeRayon { get; set; } = string.Empty;
 
@@ -101,28 +100,76 @@ public class CreateModel : PageModel
         await ChargerListesAsync();
     }
 
+    // Chargement des étagères du rayon choisi.
+    public async Task<JsonResult> OnGetEtageresAsync(string codeRayon)
+    {
+        if (string.IsNullOrWhiteSpace(codeRayon))
+            return new JsonResult(Array.Empty<object>());
+
+        var etageres = await _context.Etageres
+            .AsNoTracking()
+            .Where(e =>
+                e.Actif &&
+                e.CodeRayon == codeRayon &&
+                e.CodeRayonNavigation.Actif)
+            .OrderBy(e => e.NumeroEtagereRoman)
+            .Select(e => new
+            {
+                value = e.CodeEtagere,
+                label = e.NumeroEtagereRoman
+            })
+            .ToListAsync();
+
+        return new JsonResult(etageres);
+    }
+
+    // Chargement des places de l'étagère choisie.
+    public async Task<JsonResult> OnGetEmplacementsAsync(int codeEtagere)
+    {
+        if (codeEtagere <= 0)
+            return new JsonResult(Array.Empty<object>());
+
+        var emplacements = await _context.Emplacements
+            .AsNoTracking()
+            .Where(e =>
+                e.Actif &&
+                e.CodeEtagere == codeEtagere &&
+                e.CodeEtagereNavigation.Actif &&
+                e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
+            .OrderBy(e => e.NumeroPlace)
+            .Select(e => new
+            {
+                e.CodeEmplacement,
+                e.NumeroPlace
+            })
+            .ToListAsync();
+
+        return new JsonResult(emplacements.Select(e => new
+        {
+            value = e.CodeEmplacement,
+            label = Convert.ToString(e.NumeroPlace)
+        }));
+    }
+
     public async Task<IActionResult> OnPostAsync()
     {
-        await ChargerListesAsync();
+        // Recharge uniquement les listes nécessaires à l'affichage.
+        await ChargerListesAsync(chargerLocalisationSelectionnee: true);
 
         if (!ModelState.IsValid)
             return Page();
 
-        // Identifier le compte connecté.
         string? identifiantCompte =
             User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (!int.TryParse(identifiantCompte, out int codeCompte))
-        {
             return Forbid();
-        }
 
         await using var transaction =
             await _context.Database.BeginTransactionAsync();
 
         try
         {
-            // Vérifier que le bibliothécaire possède une session ouverte.
             long codeSession = await _context.Database
                 .SqlQuery<long>($"""
                     SELECT code_session AS "Value"
@@ -146,7 +193,6 @@ public class CreateModel : PageModel
                 return Page();
             }
 
-            // Vérifier le type de document.
             bool typeExiste = await _context.TypesDocuments
                 .AnyAsync(t =>
                     t.CodeTypeDocument == Input.CodeTypeDocument);
@@ -161,7 +207,6 @@ public class CreateModel : PageModel
                 return Page();
             }
 
-            // Vérifier la collection.
             if (Input.CodeCollection.HasValue &&
                 !await _context.Collections.AnyAsync(
                     c => c.CodeCollection == Input.CodeCollection.Value))
@@ -174,7 +219,6 @@ public class CreateModel : PageModel
                 return Page();
             }
 
-            // Vérifier l'éditeur.
             if (Input.CodeEditeur.HasValue &&
                 !await _context.Editeurs.AnyAsync(
                     e => e.CodeEditeur == Input.CodeEditeur.Value))
@@ -187,7 +231,6 @@ public class CreateModel : PageModel
                 return Page();
             }
 
-            // Vérifier la cohérence rayon / étagère / place.
             bool localisationValide = await _context.Emplacements
                 .AnyAsync(e =>
                     e.CodeEmplacement == Input.CodeEmplacement &&
@@ -207,7 +250,6 @@ public class CreateModel : PageModel
                 return Page();
             }
 
-            // Rechercher l'auteur existant ou le créer.
             string nomAuteur = Input.NomAuteur.Trim();
             string? prenomAuteur = Nettoyer(Input.PrenomAuteur);
 
@@ -230,7 +272,6 @@ public class CreateModel : PageModel
                 _context.Auteurs.Add(auteur);
             }
 
-            // Créer la notice bibliographique.
             var document = new Document
             {
                 Titre = Input.Titre.Trim(),
@@ -259,21 +300,14 @@ public class CreateModel : PageModel
             });
 
             _context.Documents.Add(document);
-
-            // Enregistrer la notice et obtenir son identifiant.
             await _context.SaveChangesAsync();
 
-            // Créer le premier exemplaire physique.
-            // Le trigger PostgreSQL génère le numéro d'inventaire.
             var exemplaire = new Exemplaire
             {
                 CodeDocument = document.CodeDocument,
                 CodeEmplacement = Input.CodeEmplacement,
                 Cote = Input.Cote.Trim(),
-
-                // Valeur provisoire remplacée par PostgreSQL.
                 NumeroInventaire = "AUTO",
-
                 DeviseValeur = "CDF",
                 EtatDocument = "BON",
                 StatutExemplaire = "DISPONIBLE",
@@ -281,14 +315,11 @@ public class CreateModel : PageModel
                 EncodePar = codeCompte
             };
 
-            // Affecter la session à l'exemplaire
-            // sans modifier la classe générée Exemplaire.
             _context.Entry(exemplaire)
                 .Property<long?>("CodeSessionEnregistrement")
                 .CurrentValue = codeSession;
 
             _context.Exemplaires.Add(exemplaire);
-
             await _context.SaveChangesAsync();
 
             await transaction.CommitAsync();
@@ -310,13 +341,14 @@ public class CreateModel : PageModel
                 "L'enregistrement a échoué. Aucune création partielle " +
                 "n'a été conservée. Vérifiez les données et réessayez.");
 
-            await ChargerListesAsync();
+            await ChargerListesAsync(chargerLocalisationSelectionnee: true);
 
             return Page();
         }
     }
 
-    private async Task ChargerListesAsync()
+    private async Task ChargerListesAsync(
+        bool chargerLocalisationSelectionnee = false)
     {
         Types = await _context.TypesDocuments
             .AsNoTracking()
@@ -339,22 +371,36 @@ public class CreateModel : PageModel
             .OrderBy(r => r.NomRayon)
             .ToListAsync();
 
-        Etageres = await _context.Etageres
-            .AsNoTracking()
-            .Where(e => e.Actif && e.CodeRayonNavigation.Actif)
-            .OrderBy(e => e.CodeRayon)
-            .ThenBy(e => e.NumeroEtagereRoman)
-            .ToListAsync();
+        Etageres = new List<Etagere>();
+        Emplacements = new List<Emplacement>();
 
-        Emplacements = await _context.Emplacements
-            .AsNoTracking()
-            .Where(e =>
-                e.Actif &&
-                e.CodeEtagereNavigation.Actif &&
-                e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
-            .OrderBy(e => e.CodeEtagere)
-            .ThenBy(e => e.NumeroPlace)
-            .ToListAsync();
+        if (!chargerLocalisationSelectionnee)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(Input.CodeRayon))
+        {
+            Etageres = await _context.Etageres
+                .AsNoTracking()
+                .Where(e =>
+                    e.Actif &&
+                    e.CodeRayon == Input.CodeRayon &&
+                    e.CodeRayonNavigation.Actif)
+                .OrderBy(e => e.NumeroEtagereRoman)
+                .ToListAsync();
+        }
+
+        if (Input.CodeEtagere > 0)
+        {
+            Emplacements = await _context.Emplacements
+                .AsNoTracking()
+                .Where(e =>
+                    e.Actif &&
+                    e.CodeEtagere == Input.CodeEtagere &&
+                    e.CodeEtagereNavigation.Actif &&
+                    e.CodeEtagereNavigation.CodeRayonNavigation.Actif)
+                .OrderBy(e => e.NumeroPlace)
+                .ToListAsync();
+        }
     }
 
     private static string? Nettoyer(string? valeur)
